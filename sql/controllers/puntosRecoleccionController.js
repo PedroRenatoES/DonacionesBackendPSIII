@@ -21,6 +21,16 @@ class PuntosDeRecoleccionController {
         }
     }
 
+    static async getByCampanaId(req, res) {
+        try {
+            const { id_campana } = req.params;
+            const puntos = await PuntosDeRecoleccionModel.getByCampanaId(id_campana);
+            res.json(puntos);
+        } catch (error) {
+            res.status(500).json({ error: 'Error obteniendo puntos por campaña' });
+        }
+    }
+
     static async create(req, res) {
         try {
             const { nombre_punto, direccion, id_campaña } = req.body;

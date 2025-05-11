@@ -15,6 +15,37 @@ class AlmacenModel {
         return result.recordset[0];
     }
 
+    static async getAlmacenesConContenido() {
+    const pool = await poolPromise;
+
+    const result = await pool.request().query(`
+      SELECT 
+        a.id_almacen,
+        a.nombre_almacen,
+        a.ubicacion,
+        es.id_estante,
+        es.nombre AS nombre_estante,
+        sp.id_espacio,
+        sp.codigo AS codigo_espacio,
+        sp.lleno,
+        da.id_articulo,
+        art.nombre_articulo,
+        da.cantidad,
+        um.nombre_unidad,
+        cat.nombre_categoria
+      FROM Almacenes a
+      JOIN Estante es ON es.id_almacen = a.id_almacen
+      JOIN Espacios sp ON sp.id_estante = es.id_estante
+      LEFT JOIN DonacionesEnEspecie da ON da.id_espacio = sp.id_espacio
+      LEFT JOIN CatalogoDeArticulos art ON da.id_articulo = art.id_articulo
+      LEFT JOIN UnidadesDeMedida um ON da.id_unidad = um.id_unidad
+      LEFT JOIN CategoriasDeArticulos cat ON art.id_categoria = cat.id_categoria
+      ORDER BY a.id_almacen, es.id_estante, sp.id_espacio
+    `);
+
+    return result.recordset;
+  }
+
     static async create(nombre_almacen, ubicacion) {
         const pool = await poolPromise;
         await pool.request()

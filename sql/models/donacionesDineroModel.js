@@ -3,7 +3,20 @@ const { sql, poolPromise } = require(require('../config').dbConnection);
 class DonacionesEnDineroModel {
     static async getAll() {
         const pool = await poolPromise;
-        const result = await pool.request().query('SELECT * FROM DonacionesEnDinero');
+        const result = await pool.request().query(`
+          SELECT 
+            dnd.id_donacion_dinero,
+            don.nombres,
+            don.apellido_paterno,
+            don.apellido_materno,
+            dnd.monto,
+            dnd.divisa,
+            dnd.nombre_cuenta,
+            dnd.numero_cuenta,
+            dnd.comprobante_url
+          FROM DonacionesEnDinero dnd
+          INNER JOIN Donaciones d ON dnd.id_donacion = d.id_donacion
+          INNER JOIN Donantes don ON d.id_donante = don.id_donante;`);
         return result.recordset;
     }
 
@@ -49,6 +62,29 @@ static async getByNumeroCuenta(numero_cuenta) {
     .query('SELECT * FROM DonacionesEnDinero WHERE numero_cuenta LIKE @numero_cuenta');
   return result.recordset;
 }
+
+static async getByCampanaId(id_campana) {
+  const pool = await poolPromise;
+  const result = await pool.request()
+    .input('id_campana', sql.Int, id_campana)
+    .query(`
+      SELECT 
+        d.id_donacion,
+        d.fecha_donacion,
+        d.estado_validacion,
+        dd.id_donacion_dinero,
+        dd.monto,
+        dd.divisa,
+        dd.nombre_cuenta,
+        dd.numero_cuenta,
+        dd.comprobante_url
+      FROM DonacionesEnDinero dd
+      INNER JOIN Donaciones d ON dd.id_donacion = d.id_donacion
+      WHERE d.id_campana = @id_campana
+    `);
+  return result.recordset;
+}
+
 
 
     static async create(id_donacion, monto, divisa, nombre_cuenta, numero_cuenta, comprobante_url, estado_validacion) {

@@ -31,6 +31,20 @@ class DonacionesEnEspecieController {
     }
 }
 
+static async getByCampanaId(req, res) {
+    try {
+      const { id_campana } = req.params;
+      const donaciones = await DonacionesEnEspecieModel.getByCampanaId(id_campana);
+      if (donaciones.length > 0) {
+        res.json(donaciones);
+      } else {
+        res.status(404).json({ error: 'No se encontraron donaciones con esa campana' });
+      }
+    } catch (error) {
+      res.status(500).json({ error: 'Error obteniendo donaciones por campana' });
+    }
+}
+
 
     static async create(req, res) {
         try {
@@ -44,32 +58,35 @@ class DonacionesEnEspecieController {
 
     static async update(req, res) {
         try {
-          const { id } = req.params;
-          const {
-            id_articulo,
-            id_espacio,
-            id_unidad,          // <- recibimos unidad
-            cantidad,
-            estado_articulo,
-            destino_donacion
-          } = req.body;
-      
-          await DonacionesEnEspecieModel.update(
-            id,
-            id_articulo,
-            id_espacio,
-            id_unidad,         // <- pasamos unidad al modelo
-            cantidad,
-            estado_articulo,
-            destino_donacion
-          );
-      
-          res.json({ message: 'Donación en especie actualizada' });
+            const { id } = req.params;
+            const {
+                id_articulo,
+                id_espacio,
+                id_unidad,          // <- recibimos unidad
+                cantidad,
+                estado_articulo,
+                cantidad_restante,  // NUEVO: recibimos cantidad restante
+                fecha_vencimiento   // NUEVO: recibimos fecha de vencimiento
+            } = req.body;
+
+            await DonacionesEnEspecieModel.update(
+                id,
+                id_articulo,
+                id_espacio,
+                id_unidad,         // <- pasamos unidad al modelo
+                cantidad,
+                estado_articulo,
+                cantidad_restante, // NUEVO: pasamos cantidad restante
+                fecha_vencimiento  // NUEVO: pasamos fecha de vencimiento
+            );
+
+            res.json({ message: 'Donación en especie actualizada' });
         } catch (error) {
-          console.error('Error actualizando donación en especie:', error);
-          res.status(500).json({ error: 'Error actualizando donación en especie' });
+            console.error('Error actualizando donación en especie:', error);
+            res.status(500).json({ error: 'Error actualizando donación en especie' });
         }
-      }
+    }
+
     
     
 

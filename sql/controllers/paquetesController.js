@@ -4,9 +4,19 @@ class PaquetesController {
   // POST /paquetes
   static async create(req, res) {
     try {
-      const { nombre_paquete, descripcion, donaciones } = req.body;
-      const id_paquete = await PaquetesModel.create(nombre_paquete, descripcion, donaciones);
-      res.status(201).json({ message: 'Paquete creado', id_paquete });
+      const { nombre_paquete, descripcion, id_pedido, donaciones } = req.body;
+      const result = await PaquetesModel.create(
+        nombre_paquete,
+        descripcion,
+        id_pedido,
+        donaciones
+      );
+
+      if (result.success) {
+        res.status(201).json({ message: 'Paquete creado', id_paquete: result.id_paquete });
+      } else {
+        res.status(400).json({ message: 'Error creando paquete', errors: result.errors });
+      }
     } catch (error) {
       console.error('Error creando paquete:', error);
       res.status(500).json({ error: 'Error creando paquete' });
@@ -41,9 +51,20 @@ class PaquetesController {
   static async update(req, res) {
     try {
       const { id } = req.params;
-      const { nombre_paquete, descripcion, donaciones } = req.body;
-      await PaquetesModel.update(parseInt(id, 10), nombre_paquete, descripcion, donaciones);
-      res.json({ message: 'Paquete actualizado' });
+      const { nombre_paquete, descripcion, id_pedido, donaciones } = req.body;
+      const result = await PaquetesModel.update(
+        parseInt(id, 10),
+        nombre_paquete,
+        descripcion,
+        id_pedido,
+        donaciones
+      );
+
+      if (result.success) {
+        res.json({ message: 'Paquete actualizado' });
+      } else {
+        res.status(400).json({ message: 'Error actualizando paquete', errors: result.errors });
+      }
     } catch (error) {
       console.error('Error actualizando paquete:', error);
       res.status(500).json({ error: 'Error actualizando paquete' });

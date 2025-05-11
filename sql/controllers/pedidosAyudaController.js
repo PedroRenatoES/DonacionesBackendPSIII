@@ -23,8 +23,8 @@ class PedidosDeAyudaController {
 
     static async create(req, res) {
         try {
-            const { fecha_pedido, descripcion, estado_pedido, id_donante } = req.body;
-            await PedidosDeAyudaModel.create(fecha_pedido, descripcion, estado_pedido, id_donante);
+            const { fecha_pedido, descripcion, estado_pedido, id_donante, ubicacion } = req.body;
+            await PedidosDeAyudaModel.create(fecha_pedido, descripcion, estado_pedido, id_donante, ubicacion); // NUEVO: pasamos ubicacion
             res.status(201).json({ message: 'Pedido de ayuda creado' });
         } catch (error) {
             res.status(500).json({ error: 'Error creando pedido de ayuda' });
@@ -34,8 +34,8 @@ class PedidosDeAyudaController {
     static async update(req, res) {
         try {
             const { id } = req.params;
-            const { fecha_pedido, descripcion, estado_pedido, id_donante } = req.body;
-            await PedidosDeAyudaModel.update(id, fecha_pedido, descripcion, estado_pedido, id_donante);
+            const { fecha_pedido, descripcion, estado_pedido, id_donante, ubicacion } = req.body;
+            await PedidosDeAyudaModel.update(id, fecha_pedido, descripcion, estado_pedido, id_donante, ubicacion); // NUEVO: pasamos ubicacion
             res.json({ message: 'Pedido de ayuda actualizado' });
         } catch (error) {
             res.status(500).json({ error: 'Error actualizando pedido de ayuda' });

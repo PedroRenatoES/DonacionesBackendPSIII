@@ -15,17 +15,18 @@ class PedidosDeAyudaModel {
         return result.recordset[0];
     }
 
-    static async create(fecha_pedido, descripcion, estado_pedido, id_donante) {
+    static async create(fecha_pedido, descripcion, estado_pedido, id_donante, ubicacion) {
         const pool = await poolPromise;
         await pool.request()
             .input('fecha_pedido', sql.DateTime, fecha_pedido)
             .input('descripcion', sql.Text, descripcion)
             .input('estado_pedido', sql.VarChar, estado_pedido)
             .input('id_donante', sql.Int, id_donante)
-            .query('INSERT INTO PedidosDeAyuda (fecha_pedido, descripcion, estado_pedido, id_donante) VALUES (@fecha_pedido, @descripcion, @estado_pedido, @id_donante)');
+            .input('ubicacion', sql.Text, ubicacion)    // NUEVO: campo ubicacion
+            .query('INSERT INTO PedidosDeAyuda (fecha_pedido, descripcion, estado_pedido, id_donante, ubicacion) VALUES (@fecha_pedido, @descripcion, @estado_pedido, @id_donante, @ubicacion)');
     }
 
-    static async update(id, fecha_pedido, descripcion, estado_pedido, id_donante) {
+    static async update(id, fecha_pedido, descripcion, estado_pedido, id_donante, ubicacion) {
         const pool = await poolPromise;
         await pool.request()
             .input('id', sql.Int, id)
@@ -33,7 +34,8 @@ class PedidosDeAyudaModel {
             .input('descripcion', sql.Text, descripcion)
             .input('estado_pedido', sql.VarChar, estado_pedido)
             .input('id_donante', sql.Int, id_donante)
-            .query('UPDATE PedidosDeAyuda SET fecha_pedido = @fecha_pedido, descripcion = @descripcion, estado_pedido = @estado_pedido, id_donante = @id_donante WHERE id_pedido = @id');
+            .input('ubicacion', sql.Text, ubicacion)    // NUEVO: campo ubicacion
+            .query('UPDATE PedidosDeAyuda SET fecha_pedido = @fecha_pedido, descripcion = @descripcion, estado_pedido = @estado_pedido, id_donante = @id_donante, ubicacion = @ubicacion WHERE id_pedido = @id');
     }
 
     static async delete(id) {

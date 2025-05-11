@@ -21,6 +21,18 @@ class AlmacenController {
         }
     }
 
+    static async getByAlmacenes(req, res) {
+        try {
+            const { id_almacen } = req.params;
+            const espacios = await AlmacenModel.getByAlmacen(id_almacen);
+            res.json(espacios);
+        } catch (error) {
+            console.error('Error al obtener espacios por almacén:', error);
+            res.status(500).json({ error: 'Error al obtener espacios' });
+        }
+        
+    }
+
     static async create(req, res) {
         try {
             const { nombre_almacen, ubicacion } = req.body;

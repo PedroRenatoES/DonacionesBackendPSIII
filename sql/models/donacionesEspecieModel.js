@@ -3,7 +3,22 @@ const { sql, poolPromise } = require(require('../config').dbConnection);
 class DonacionesEnEspecieModel {
     static async getAll() {
         const pool = await poolPromise;
-        const result = await pool.request().query('SELECT * FROM DonacionesEnEspecie');
+        const result = await pool.request().query(`
+          SELECT 
+            dee.id_donacion_especie,
+            dee.id_donacion,
+            don.nombres,
+            don.apellido_paterno,
+            don.apellido_materno,
+            dee.id_articulo,
+            dee.id_espacio,
+            dee.id_unidad,
+            dee.cantidad,
+            dee.estado_articulo,
+            dee.destino_donacion
+        FROM DonacionesEnEspecie dee
+        INNER JOIN Donaciones d ON dee.id_donacion = d.id_donacion
+        INNER JOIN Donantes don ON d.id_donante = don.id_donante;`);
         return result.recordset;
     }
 
@@ -28,6 +43,39 @@ class DonacionesEnEspecieModel {
     return result.recordset;
 }
 
+ static async getByCampanaId(id_campana) {
+    const pool = await poolPromise;
+    const result = await pool.request()
+      .input('id_campana', sql.Int, id_campana)
+      .query(`
+        SELECT
+          d.id_donacion,
+          d.fecha_donacion,
+          d.estado_validacion,
+          e.id_donacion_especie,
+          e.cantidad,
+          e.estado_articulo,
+          e.destino_donacion,
+          ca.nombre_articulo,
+          ca.descripcion AS descripcion_articulo,
+          um.nombre_unidad,
+          um.simbolo,
+          esp.id_espacio,
+          esp.codigo AS codigo_espacio,
+          est.nombre AS nombre_estante,
+          alm.nombre_almacen
+        FROM DonacionesEnEspecie e
+        INNER JOIN Donaciones d ON e.id_donacion = d.id_donacion
+        INNER JOIN CatalogoDeArticulos ca ON e.id_articulo = ca.id_articulo
+        INNER JOIN UnidadesDeMedida um ON e.id_unidad = um.id_unidad
+        LEFT JOIN Espacios esp ON e.id_espacio = esp.id_espacio
+        LEFT JOIN Estante est ON esp.id_estante = est.id_estante
+        LEFT JOIN Almacenes alm ON est.id_almacen = alm.id_almacen
+        WHERE d.id_campana = @id_campana
+      `);
+    return result.recordset;
+  }
+
 
     static async create(id_donacion, id_articulo, cantidad, estado_articulo, destino_donacion, fila = null, columna = null, estante = null) {
         const pool = await poolPromise;
@@ -51,29 +99,32 @@ class DonacionesEnEspecieModel {
         id_unidad,           // <- nuevo parámetro
         cantidad,
         estado_articulo,
-        destino_donacion
+        cantidad_restante = cantidad,   // NUEVO: parámetro para cantidad restante
+        fecha_vencimiento    // NUEVO: parámetro para fecha de vencimiento
       ) {
-        const pool = await poolPromise;
-        await pool.request()
-          .input('id', sql.Int, id)
-          .input('id_articulo', sql.Int, id_articulo)
-          .input('id_espacio', sql.Int, id_espacio)
-          .input('id_unidad', sql.Int, id_unidad)           // <- input unidad
-          .input('cantidad', sql.Decimal(18,2), cantidad)    // DECIMAL(18,2)
-          .input('estado_articulo', sql.VarChar(100), estado_articulo)
-          .input('destino_donacion', sql.Text, destino_donacion)
-          .query(`
-            UPDATE DonacionesEnEspecie
-            SET
-              id_articulo    = @id_articulo,
-              id_espacio     = @id_espacio,
-              id_unidad      = @id_unidad,
-              cantidad       = @cantidad,
-              estado_articulo= @estado_articulo,
-              destino_donacion = @destino_donacion
-            WHERE id_donacion_especie = @id
-          `);
-      }
+          const pool = await poolPromise;
+          await pool.request()
+            .input('id', sql.Int, id)
+            .input('id_articulo', sql.Int, id_articulo)
+            .input('id_espacio', sql.Int, id_espacio)
+            .input('id_unidad', sql.Int, id_unidad)           // <- input unidad
+            .input('cantidad', sql.Decimal(18,2), cantidad)    // DECIMAL(18,2)
+            .input('estado_articulo', sql.VarChar(100), estado_articulo)
+            .input('cantidad_restante', sql.Decimal(18, 2), cantidad_restante) // NUEVO
+            .input('fecha_vencimiento', sql.Date, fecha_vencimiento) // NUEVO
+            .query(`
+              UPDATE DonacionesEnEspecie
+              SET
+                id_articulo    = @id_articulo,
+                id_espacio     = @id_espacio,
+                id_unidad      = @id_unidad,
+                cantidad       = @cantidad,
+                estado_articulo= @estado_articulo,
+                cantidad_restante = @cantidad_restante,
+                fecha_vencimiento = @fecha_vencimiento
+              WHERE id_donacion_especie = @id
+            `);
+        }
       
 
     static async delete(id) {
@@ -83,24 +134,57 @@ class DonacionesEnEspecieModel {
             .query('DELETE FROM DonacionesEnEspecie WHERE id_donacion = @id');
     }
 
-    static async getInventarioConUbicacion() {
+  static async getInventarioConUbicacion() {
     const pool = await poolPromise;
     const result = await pool.request().query(`
-        SELECT 
+      SELECT 
         d.id_articulo,
         a.nombre_articulo,
-        d.cantidad,
-        e.codigo AS espacio,
-        es.nombre AS estante,
+        c.nombre_categoria,
+        u.nombre_unidad,
+        d.cantidad_restante AS cantidad,   -- mostramos sólo cantidad_restante
+        d.fecha_vencimiento,               -- fecha de vencimiento
+        e.codigo       AS espacio,
+        es.nombre      AS estante,
         al.nombre_almacen
-        FROM DonacionesEnEspecie d
-        JOIN CatalogoDeArticulos a ON d.id_articulo = a.id_articulo
-        JOIN Espacios e ON d.id_espacio = e.id_espacio
-        JOIN Estante es ON e.id_estante = es.id_estante
-        JOIN Almacenes al ON es.id_almacen = al.id_almacen
+      FROM DonacionesEnEspecie d
+      JOIN CatalogoDeArticulos a 
+        ON d.id_articulo = a.id_articulo
+      JOIN CategoriasDeArticulos c 
+        ON a.id_categoria = c.id_categoria
+      JOIN UnidadesDeMedida u 
+        ON d.id_unidad = u.id_unidad
+      JOIN Espacios e 
+        ON d.id_espacio = e.id_espacio
+      JOIN Estante es 
+        ON e.id_estante = es.id_estante
+      JOIN Almacenes al 
+        ON es.id_almacen = al.id_almacen
+      WHERE d.cantidad_restante > 0
+      ORDER BY a.nombre_articulo, al.nombre_almacen, es.nombre, e.codigo;
     `);
     return result.recordset;
-    }
+  }
+
+  static async getStockPorArticulo() {
+    const pool = await poolPromise;
+    const result = await pool.request().query(`
+      SELECT
+        de.id_articulo,
+        a.nombre_articulo,
+        u.nombre_unidad,
+        SUM(de.cantidad_restante) AS total_restante
+      FROM DonacionesEnEspecie de
+      JOIN CatalogoDeArticulos a 
+        ON de.id_articulo = a.id_articulo
+      JOIN UnidadesDeMedida u 
+        ON de.id_unidad = u.id_unidad
+      WHERE de.cantidad_restante > 0
+      GROUP BY de.id_articulo, a.nombre_articulo, u.nombre_unidad
+      ORDER BY a.nombre_articulo;
+    `);
+    return result.recordset;
+  }
 
 
 }

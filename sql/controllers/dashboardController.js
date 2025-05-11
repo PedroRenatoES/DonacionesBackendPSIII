@@ -46,6 +46,43 @@ class DashboardController {
             res.status(500).json({ error: 'Error obteniendo actividad reciente' });
         }
     }
+
+    static async getDonacionesPorPuntos(req, res) {
+        try {
+            const data = await DashboardModel.getDonacionesPorPuntos();
+            res.json(data);
+        } catch (error) {
+            res.status(500).json({ error: 'Error obteniendo donaciones por puntos' });
+        }
+    }
+
+    static async getDonacionesDineroPorPuntos(req, res) {
+        try {
+            const data = await DashboardModel.getDonacionesDineroPorPuntos();
+            res.json(data);
+        } catch (error) {
+            res.status(500).json({ error: 'Error obteniendo donaciones en dinero por puntos' });
+        }
+    }
+
+    static async getDonacionesEspeciePorPuntos(req, res) {
+        try {
+            const data = await DashboardModel.getDonacionesEspeciePorPuntos();
+            res.json(data);
+        } catch (error) {
+            res.status(500).json({ error: 'Error obteniendo donaciones en especie por puntos' });
+        }
+    }
+
+    static async donacionesPorVencer(req, res) {
+        try {
+            const data = await DashboardModel.getDonacionesPorVencer();
+            res.json(data);
+        } catch (error) {
+            console.error('Error obteniendo donaciones por vencer:', error);
+            res.status(500).json({ error: 'Error obteniendo donaciones próximas a vencer' });
+        }
+    }
 }
 
 module.exports = DashboardController;

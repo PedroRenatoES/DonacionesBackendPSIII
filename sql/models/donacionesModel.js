@@ -45,7 +45,7 @@ class DonacionesModel {
             let id_resultado = id_donacion;
 
             if (tipo_donacion === 'especie') {
-            // Inserto la fila en DonacionesEnEspecie, incluyendo id_unidad
+
             const especieResult = await pool.request()
                 .input('id_donacion', sql.Int, id_donacion)
                 .input('id_articulo', sql.Int, null)
@@ -53,12 +53,13 @@ class DonacionesModel {
                 .input('id_unidad', sql.Int, id_unidad)                // <- input para unidad
                 .input('cantidad', sql.Decimal(18,2), null)            // ajustar a DECIMAL
                 .input('estado_articulo', sql.VarChar(100), 'sin asignar')
-                .input('destino_donacion', sql.Text, 'sin asignar')
-                .query(`
+                .input('cantidad_restante', sql.Decimal(18, 2), null)  // NUEVO: cantidad restante
+                .input('fecha_vencimiento', sql.Date, null)            // NUEVO: fecha_vencimiento (opcional)
+                .query(`    
                 INSERT INTO DonacionesEnEspecie
-                    (id_donacion, id_articulo, id_espacio, id_unidad, cantidad, estado_articulo, destino_donacion)
+                    (id_donacion, id_articulo, id_espacio, id_unidad, cantidad, estado_articulo, cantidad_restante, fecha_vencimiento)
                 VALUES
-                    (@id_donacion, @id_articulo, @id_espacio, @id_unidad, @cantidad, @estado_articulo, @destino_donacion);
+                    (@id_donacion, @id_articulo, @id_espacio, @id_unidad, @cantidad, @estado_articulo, @cantidad_restante, @fecha_vencimiento);
                 SELECT SCOPE_IDENTITY() AS id_donacion_especie;
                 `);
 

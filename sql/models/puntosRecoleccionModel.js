@@ -15,6 +15,14 @@ class PuntosDeRecoleccionModel {
         return result.recordset[0];
     }
 
+    static async getByCampanaId(id_campana) {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('id_campana', sql.Int, id_campana)
+            .query('SELECT * FROM PuntosDeRecoleccion WHERE id_campana = @id_campana');
+        return result.recordset;
+    }
+
     static async create(nombre_punto, direccion, id_campaña) {
         const pool = await poolPromise;
         await pool.request()

@@ -15,22 +15,53 @@ class DonanteModel {
         return result.recordset[0];
     }
 
-static async create(nombres, apellido_paterno, apellido_materno, correo, telefono, usuario, contraseña_hash) {
-    const pool = await poolPromise;
-    const result = await pool.request()
-        .input('nombres', sql.VarChar, nombres)
-        .input('apellido_paterno', sql.VarChar, apellido_paterno)
-        .input('apellido_materno', sql.VarChar, apellido_materno)
-        .input('correo', sql.VarChar, correo)
-        .input('telefono', sql.VarChar, telefono)
-        .input('usuario', sql.VarChar, usuario)
-        .input('contraseña_hash', sql.VarChar, contraseña_hash)
-        .query(`INSERT INTO Donantes (nombres, apellido_paterno, apellido_materno, correo, telefono, usuario, contraseña_hash)
-                OUTPUT INSERTED.id_donante
-                VALUES (@nombres, @apellido_paterno, @apellido_materno, @correo, @telefono, @usuario, @contraseña_hash)`);
+    static async getDonacionesByDonante(id_donante) {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('id_donante', sql.Int, id_donante)
+            .query(`
+                SELECT 
+                  de.id_donacion_especie,
+                  art.nombre_articulo,
+                  de.cantidad,
+                  de.cantidad_restante,
+                  pd.id_paquete,
+                  p.nombre_paquete,
+                  pa.id_pedido,
+                  pa.ubicacion
+                FROM DonacionesEnEspecie de
+                JOIN Donaciones d 
+                  ON de.id_donacion = d.id_donacion
+                JOIN CatalogoDeArticulos art 
+                  ON de.id_articulo = art.id_articulo
+                LEFT JOIN PaqueteDonaciones pd 
+                  ON de.id_donacion_especie = pd.id_donacion_especie
+                LEFT JOIN Paquetes p 
+                  ON pd.id_paquete = p.id_paquete
+                LEFT JOIN PedidosDeAyuda pa 
+                  ON p.id_pedido = pa.id_pedido
+                WHERE d.id_donante = @id_donante
+                ORDER BY de.id_donacion_especie;
+            `);
+        return result.recordset;
+    }
 
-    return result.recordset[0].id_donante; // devuelve el id_donante insertado
-}
+    static async create(nombres, apellido_paterno, apellido_materno, correo, telefono, usuario, contraseña_hash) {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('nombres', sql.VarChar, nombres)
+            .input('apellido_paterno', sql.VarChar, apellido_paterno)
+            .input('apellido_materno', sql.VarChar, apellido_materno)
+            .input('correo', sql.VarChar, correo)
+            .input('telefono', sql.VarChar, telefono)
+            .input('usuario', sql.VarChar, usuario)
+            .input('contraseña_hash', sql.VarChar, contraseña_hash)
+            .query(`INSERT INTO Donantes (nombres, apellido_paterno, apellido_materno, correo, telefono, usuario, contraseña_hash)
+                    OUTPUT INSERTED.id_donante
+                    VALUES (@nombres, @apellido_paterno, @apellido_materno, @correo, @telefono, @usuario, @contraseña_hash)`);
+
+        return result.recordset[0].id_donante; // devuelve el id_donante insertado
+    }
 
 
     static async update(id, nombres, apellido_paterno, apellido_materno, correo, telefono, usuario, contraseña_hash) {

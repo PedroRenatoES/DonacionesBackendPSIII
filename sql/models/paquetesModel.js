@@ -2,33 +2,84 @@ const { sql, poolPromise } = require(require('../config').dbConnection);
 
 class PaquetesModel {
   // Crear paquete y, opcionalmente, asociar donaciones en especie
-  static async create(nombre_paquete, descripcion, donaciones = []) {
+  static async create(nombre_paquete, descripcion, id_pedido, donaciones = []) {
     const pool = await poolPromise;
-    // Insertar paquete
     const result = await pool.request()
       .input('nombre_paquete', sql.VarChar, nombre_paquete)
       .input('descripcion',    sql.Text,    descripcion)
+      .input('id_pedido',      sql.Int,     id_pedido)
       .query(`
-        INSERT INTO Paquetes (nombre_paquete, descripcion)
+        INSERT INTO Paquetes (nombre_paquete, descripcion, id_pedido)
         OUTPUT INSERTED.id_paquete
-        VALUES (@nombre_paquete, @descripcion);
+        VALUES (@nombre_paquete, @descripcion, @id_pedido);
       `);
     const id_paquete = result.recordset[0].id_paquete;
 
-    // Asociar donaciones en especie si se pasan IDs
+    let errorMessages = [];
     if (Array.isArray(donaciones) && donaciones.length) {
       const table = new sql.Table('PaqueteDonacionesType');
-      table.columns.add('id_paquete', sql.Int);
+      table.columns.add('id_paquete',          sql.Int);
       table.columns.add('id_donacion_especie', sql.Int);
-      donaciones.forEach(idE => table.rows.add(id_paquete, idE));
+      table.columns.add('cantidad_asignada',   sql.Decimal(18, 2));
+
+      for (let { id_donacion_especie, cantidad_asignada } of donaciones) {
+        // Traer estado_articulo y cantidad_restante
+        const info = await pool.request()
+          .input('id_donacion_especie', sql.Int, id_donacion_especie)
+          .query(`
+            SELECT estado_articulo, cantidad_restante
+            FROM DonacionesEnEspecie
+            WHERE id_donacion_especie = @id_donacion_especie;
+          `);
+        if (!info.recordset.length) {
+          errorMessages.push(`No existe la donación ${id_donacion_especie}.`);
+          continue;
+        }
+        const { estado_articulo, cantidad_restante } = info.recordset[0];
+
+        if (estado_articulo === 'sellado') {
+          errorMessages.push(`La donación ${id_donacion_especie} está sellada y no es particionable.`);
+          continue;
+        }
+        if (cantidad_asignada > cantidad_restante) {
+          errorMessages.push(
+            `La cantidad asignada (${cantidad_asignada}) para la donación ${id_donacion_especie} ` +
+            `no puede ser mayor que la cantidad restante (${cantidad_restante}).`
+          );
+          continue;
+        }
+        if (cantidad_restante - cantidad_asignada < 0) {
+          errorMessages.push(`La cantidad restante de la donación ${id_donacion_especie} no puede ser menor a 0.`);
+          continue;
+        }
+
+        table.rows.add(id_paquete, id_donacion_especie, cantidad_asignada);
+      }
+
+      if (errorMessages.length) {
+        return { success: false, errors: errorMessages };
+      }
+
       await pool.request()
         .input('tvp', table)
         .query(`
-          INSERT INTO PaqueteDonaciones (id_paquete, id_donacion_especie)
-          SELECT id_paquete, id_donacion_especie FROM @tvp;
+          INSERT INTO PaqueteDonaciones (id_paquete, id_donacion_especie, cantidad_asignada)
+          SELECT id_paquete, id_donacion_especie, cantidad_asignada FROM @tvp;
         `);
+
+      for (let { id_donacion_especie, cantidad_asignada } of donaciones) {
+        await pool.request()
+          .input('id_donacion_especie', sql.Int, id_donacion_especie)
+          .input('cantidad_asignada',   sql.Decimal(18, 2), cantidad_asignada)
+          .query(`
+            UPDATE DonacionesEnEspecie
+            SET cantidad_restante = cantidad_restante - @cantidad_asignada
+            WHERE id_donacion_especie = @id_donacion_especie;
+          `);
+      }
     }
-    return id_paquete;
+
+    return { success: true, id_paquete };
   }
 
   // Obtener todos los paquetes (sin detalles de items)
@@ -79,46 +130,90 @@ class PaquetesModel {
   }
 
   // Actualizar datos básicos y items de un paquete
-  static async update(id_paquete, nombre_paquete, descripcion, donaciones = []) {
+  static async update(id_paquete, nombre_paquete, descripcion, id_pedido, donaciones = []) {
     const pool = await poolPromise;
-    // Actualizar cabecera
+
     await pool.request()
-      .input('id_paquete',    sql.Int,     id_paquete)
+      .input('id_paquete',    sql.Int,   id_paquete)
       .input('nombre_paquete', sql.VarChar, nombre_paquete)
-      .input('descripcion',    sql.Text,    descripcion)
+      .input('descripcion',     sql.Text,    descripcion)
+      .input('id_pedido',       sql.Int,     id_pedido)
       .query(`
         UPDATE Paquetes
         SET nombre_paquete = @nombre_paquete,
-            descripcion    = @descripcion
+            descripcion    = @descripcion,
+            id_pedido      = @id_pedido
         WHERE id_paquete = @id_paquete;
       `);
-    // Reemplazar items: eliminar existentes y volver a insertar
+
     await pool.request()
       .input('id_paquete', sql.Int, id_paquete)
       .query(`DELETE FROM PaqueteDonaciones WHERE id_paquete = @id_paquete;`);
+
+    let errorMessages = [];
     if (Array.isArray(donaciones) && donaciones.length) {
       const table = new sql.Table('PaqueteDonacionesType');
-      table.columns.add('id_paquete', sql.Int);
+      table.columns.add('id_paquete',          sql.Int);
       table.columns.add('id_donacion_especie', sql.Int);
-      donaciones.forEach(idE => table.rows.add(id_paquete, idE));
+      table.columns.add('cantidad_asignada',   sql.Decimal(18, 2));
+
+      for (let { id_donacion_especie, cantidad_asignada } of donaciones) {
+        const info = await pool.request()
+          .input('id_donacion_especie', sql.Int, id_donacion_especie)
+          .query(`
+            SELECT estado_articulo, cantidad_restante
+            FROM DonacionesEnEspecie
+            WHERE id_donacion_especie = @id_donacion_especie;
+          `);
+        if (!info.recordset.length) {
+          errorMessages.push(`No existe la donación ${id_donacion_especie}.`);
+          continue;
+        }
+        const { estado_articulo, cantidad_restante } = info.recordset[0];
+
+        if (estado_articulo === 'sellado') {
+          errorMessages.push(`La donación ${id_donacion_especie} está sellada y no es particionable.`);
+          continue;
+        }
+        if (cantidad_asignada > cantidad_restante) {
+          errorMessages.push(
+            `La cantidad asignada (${cantidad_asignada}) para la donación ${id_donacion_especie} ` +
+            `no puede ser mayor que la cantidad restante (${cantidad_restante}).`
+          );
+          continue;
+        }
+        if (cantidad_restante - cantidad_asignada < 0) {
+          errorMessages.push(`La cantidad restante de la donación ${id_donacion_especie} no puede ser menor a 0.`);
+          continue;
+        }
+
+        table.rows.add(id_paquete, id_donacion_especie, cantidad_asignada);
+      }
+
+      if (errorMessages.length) {
+        return { success: false, errors: errorMessages };
+      }
+
       await pool.request()
         .input('tvp', table)
         .query(`
-          INSERT INTO PaqueteDonaciones (id_paquete, id_donacion_especie)
-          SELECT id_paquete, id_donacion_especie FROM @tvp;
+          INSERT INTO PaqueteDonaciones (id_paquete, id_donacion_especie, cantidad_asignada)
+          SELECT id_paquete, id_donacion_especie, cantidad_asignada FROM @tvp;
         `);
-    }
-  }
 
-  // Eliminar un paquete y sus asociaciones
-  static async delete(id_paquete) {
-    const pool = await poolPromise;
-    await pool.request()
-      .input('id_paquete', sql.Int, id_paquete)
-      .query(`
-        DELETE FROM PaqueteDonaciones WHERE id_paquete = @id_paquete;
-        DELETE FROM Paquetes         WHERE id_paquete = @id_paquete;
-      `);
+      for (let { id_donacion_especie, cantidad_asignada } of donaciones) {
+        await pool.request()
+          .input('id_donacion_especie', sql.Int, id_donacion_especie)
+          .input('cantidad_asignada',   sql.Decimal(18, 2), cantidad_asignada)
+          .query(`
+            UPDATE DonacionesEnEspecie
+            SET cantidad_restante = cantidad_restante - @cantidad_asignada
+            WHERE id_donacion_especie = @id_donacion_especie;
+          `);
+      }
+    }
+
+    return { success: true, id_paquete };
   }
 }
 

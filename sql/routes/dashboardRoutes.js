@@ -9,5 +9,9 @@ router.get('/donantes-activos', authenticateToken, DashboardController.donantesA
 router.get('/donaciones-por-mes/:anio', authenticateToken, DashboardController.donacionesPorMes);
 router.get('/tipo-donaciones', authenticateToken, DashboardController.tipoDonaciones);
 router.get('/actividad-reciente', authenticateToken, DashboardController.actividadReciente);
+router.get('/donaciones/por-punto', authenticateToken, DashboardController.getDonacionesPorPuntos);
+router.get('/donaciones/por-punto-dinero', authenticateToken, DashboardController.getDonacionesDineroPorPuntos);
+router.get('/donaciones/por-punto-especie', authenticateToken, DashboardController.getDonacionesEspeciePorPuntos);
+router.get('/donaciones/vencer', DashboardController.donacionesPorVencer);
 
 module.exports = router;

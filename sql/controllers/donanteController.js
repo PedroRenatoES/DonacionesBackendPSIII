@@ -21,6 +21,21 @@ class DonanteController {
         }
     }
 
+    static async getDonacionesByDonante(req, res) {
+        try {
+            const { id } = req.params;
+            const donaciones = await DonanteModel.getDonacionesByDonante(id);
+            if (donaciones.length) {
+                res.json(donaciones);
+            } else {
+                res.status(404).json({ message: 'No se encontraron donaciones para este donante' });
+            }
+        } catch (error) {
+            console.error('Error obteniendo donaciones del donante:', error);
+            res.status(500).json({ error: 'Error obteniendo las donaciones del donante' });
+        }
+    }
+
     static async create(req, res) {
         try {
             const { nombres, apellido_paterno, apellido_materno, correo, telefono, usuario, contraseña_hash } = req.body;

@@ -1,6 +1,6 @@
 const DonacionesEnEspecieModel = require('../models/donacionesEspecieModel');
 
-class InventarioController  {
+class InventarioController {
   static async getInventarioConUbicaciones(req, res) {
     try {
       const datos = await DonacionesEnEspecieModel.getInventarioConUbicacion();
@@ -12,6 +12,8 @@ class InventarioController  {
           agrupado[nombre] = {
             id_articulo: item.id_articulo,
             nombre_articulo: nombre,
+            nombre_categoria: item.nombre_categoria,
+            nombre_unidad: item.nombre_unidad,
             cantidad_total: 0,
             ubicaciones: []
           };
@@ -20,7 +22,7 @@ class InventarioController  {
         agrupado[nombre].cantidad_total += item.cantidad;
         agrupado[nombre].ubicaciones.push({
           espacio: item.espacio,
-          estante: item.nombre_estante,
+          estante: item.estante,
           almacen: item.nombre_almacen
         });
       });
@@ -31,6 +33,16 @@ class InventarioController  {
       res.status(500).send('Error interno del servidor');
     }
   }
-};
+
+  static async getStockPorArticulo(req, res) {
+    try {
+      const datos = await DonacionesEnEspecieModel.getStockPorArticulo();
+      res.json(datos);
+    } catch (err) {
+      console.error('Error en InventarioController.getStockPorArticulo:', err);
+      res.status(500).send('Error interno del servidor');
+    }
+  }
+}
 
 module.exports = InventarioController;
