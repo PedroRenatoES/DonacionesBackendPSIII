@@ -68,6 +68,14 @@ class EstanteModel {
             .input('id', sql.Int, id)
             .query('DELETE FROM Estante WHERE id_estante = @id');
     }
+
+    static async getByAlmacen(id_almacen) {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('id_almacen', sql.Int, id_almacen)
+            .query('SELECT * FROM Estante WHERE id_almacen = @id_almacen');
+        return result.recordset;
+    }
 }
 
 module.exports = EstanteModel;

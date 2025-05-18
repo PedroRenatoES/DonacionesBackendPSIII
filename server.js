@@ -27,6 +27,7 @@ const unidadesRoutes = require('./sql/routes/unidadesRoutes.js');
 const donacionesRopaRoutes = require('./sql/routes/donacionesRopaRoutes.js');
 const solicitudesRecoleccion = require('./sql/routes/solicitudesRecoleccionRoutes.js')
 const paquetes = require('./sql/routes/paquetesRoutes.js')
+const reportes = require('./sql/routes/reportesRoutes.js')
 
 const PORT = 3000;
 const app = express();
@@ -79,6 +80,7 @@ app.use('/api/unidades', unidadesRoutes);
 app.use('/api/donacionesRopa', donacionesRopaRoutes);
 app.use('/api/solicitudesRecoleccion', solicitudesRecoleccion);
 app.use('/api/paquetes', paquetes)
+app.use('/api/reportes', reportes)
 
 poolPromise.then(pool => {
   app.listen(PORT, () => {

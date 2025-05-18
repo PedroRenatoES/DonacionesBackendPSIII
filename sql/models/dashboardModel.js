@@ -105,19 +105,26 @@ static async getDonacionesEspeciePorPuntos() {
         const result = await pool.request()
             .query(`
                 SELECT 
-                  de.id_donacion_especie,
-                  d.id_donacion,
-                  art.nombre_articulo,
-                  de.cantidad_restante,
-                  de.fecha_vencimiento
-                FROM DonacionesEnEspecie de
-                JOIN Donaciones d 
-                  ON de.id_donacion = d.id_donacion
-                JOIN CatalogoDeArticulos art 
-                  ON de.id_articulo = art.id_articulo
-                WHERE de.fecha_vencimiento IS NOT NULL
-                  AND de.fecha_vencimiento <= DATEADD(DAY, 30, GETDATE())
-                ORDER BY de.fecha_vencimiento ASC;
+                    dee.id_donacion_especie,
+                    dee.id_donacion,
+                    don.nombres,
+                    don.apellido_paterno,
+                    don.apellido_materno,
+                    dee.id_articulo,
+                    art.nombre_articulo,
+                    dee.id_espacio,
+                    dee.id_unidad,
+                    dee.cantidad,
+                    dee.cantidad_restante,
+                    dee.estado_articulo,
+                    dee.fecha_vencimiento
+                FROM DonacionesEnEspecie dee
+                INNER JOIN Donaciones d ON dee.id_donacion = d.id_donacion
+                INNER JOIN Donantes don ON d.id_donante = don.id_donante
+                INNER JOIN CatalogoDeArticulos art ON dee.id_articulo = art.id_articulo
+                WHERE dee.fecha_vencimiento IS NOT NULL
+                AND dee.fecha_vencimiento <= DATEADD(DAY, 30, GETDATE())
+                ORDER BY dee.fecha_vencimiento ASC;
             `);
         return result.recordset;
     }

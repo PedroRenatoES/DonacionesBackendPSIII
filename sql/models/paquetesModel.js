@@ -94,9 +94,10 @@ class PaquetesModel {
     return result.recordset;
   }
 
-  // Obtener un paquete con sus items detallados
+  // Obtener un paquete con sus items detallados y totales por artículo
   static async getById(id_paquete) {
     const pool = await poolPromise;
+
     // Datos del paquete
     const pkgRes = await pool.request()
       .input('id_paquete', sql.Int, id_paquete)
@@ -105,17 +106,18 @@ class PaquetesModel {
         FROM Paquetes
         WHERE id_paquete = @id_paquete;
       `);
+
     const paquete = pkgRes.recordset[0];
     if (!paquete) return null;
 
-    // Items asociados
+    // Items detallados
     const itemsRes = await pool.request()
       .input('id_paquete', sql.Int, id_paquete)
       .query(`
         SELECT deE.id_donacion_especie,
-               art.nombre_articulo,
-               deE.cantidad,
-               u.simbolo AS unidad
+              art.nombre_articulo,
+              deE.cantidad,
+              u.simbolo AS unidad
         FROM PaqueteDonaciones pd
         JOIN DonacionesEnEspecie deE
           ON pd.id_donacion_especie = deE.id_donacion_especie
@@ -125,7 +127,25 @@ class PaquetesModel {
           ON deE.id_unidad = u.id_unidad
         WHERE pd.id_paquete = @id_paquete;
       `);
-    paquete.items = itemsRes.recordset;
+
+    const items = itemsRes.recordset;
+    paquete.items = items;
+
+    // Totales por artículo
+    const totalMap = {};
+    for (const item of items) {
+      const key = `${item.nombre_articulo} (${item.unidad})`;
+      if (!totalMap[key]) {
+        totalMap[key] = 0;
+      }
+      totalMap[key] += item.cantidad;
+    }
+
+    paquete.totales_por_articulo = Object.entries(totalMap).map(([nombre_articulo, total]) => ({
+      nombre_articulo,
+      total
+    }));
+
     return paquete;
   }
 

@@ -6,6 +6,7 @@ const router = express.Router();
 
 router.get('/', authenticateToken, EstanteController.getAll);
 router.get('/:id', authenticateToken, EstanteController.getById);
+router.get('/almacen/:id', EstanteController.getByAlmacen);
 router.post('/', authenticateToken, EstanteController.create);
 router.put('/:id', authenticateToken, EstanteController.update);
 router.delete('/:id', authenticateToken, EstanteController.delete);

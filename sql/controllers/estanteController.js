@@ -51,6 +51,21 @@ class EstanteController {
             res.status(500).json({ error: 'Error eliminando estante' });
         }
     }
+
+    static async getByAlmacen(req, res) {
+        try {
+            const id = parseInt(req.params.id);
+            if (isNaN(id)) {
+                return res.status(400).json({ error: 'ID inválido' });
+            }
+
+            const estantes = await EstanteModel.getByAlmacen(id);
+            res.json(estantes);
+        } catch (error) {
+            console.error('Error al obtener estantes por almacén:', error);
+            res.status(500).json({ error: 'Error interno del servidor' });
+        }
+    }
 }
 
 module.exports = EstanteController;

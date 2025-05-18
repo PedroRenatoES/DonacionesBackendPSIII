@@ -87,9 +87,6 @@ static async getByCampanaId(req, res) {
         }
     }
 
-    
-    
-
     static async delete(req, res) {
         try {
             const { id } = req.params;
@@ -97,6 +94,17 @@ static async getByCampanaId(req, res) {
             res.json({ message: 'Donación en especie eliminada' });
         } catch (error) {
             res.status(500).json({ error: 'Error eliminando donación en especie' });
+        }
+    }
+
+    static async updateEspacio(req, res) {
+        try {
+            const { id_donacion_especie, id_espacio } = req.body;
+            await DonacionesEnEspecieModel.actualizarEspacio(id_donacion_especie, id_espacio);
+            res.json({ message: 'Espacio actualizado para la donación en especie' });
+        } catch (error) {   
+            console.error('Error actualizando espacio:', error);
+            res.status(500).json({ error: 'Error actualizando espacio de donación en especie' });
         }
     }
 }

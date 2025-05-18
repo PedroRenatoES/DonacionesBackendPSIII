@@ -14,8 +14,8 @@ class DonacionesEnEspecieModel {
             dee.id_espacio,
             dee.id_unidad,
             dee.cantidad,
-            dee.estado_articulo,
-            dee.destino_donacion
+            dee.cantidad_restante,
+            dee.estado_articulo
         FROM DonacionesEnEspecie dee
         INNER JOIN Donaciones d ON dee.id_donacion = d.id_donacion
         INNER JOIN Donantes don ON d.id_donante = don.id_donante;`);
@@ -55,7 +55,6 @@ class DonacionesEnEspecieModel {
           e.id_donacion_especie,
           e.cantidad,
           e.estado_articulo,
-          e.destino_donacion,
           ca.nombre_articulo,
           ca.descripcion AS descripcion_articulo,
           um.nombre_unidad,
@@ -170,21 +169,41 @@ class DonacionesEnEspecieModel {
     const pool = await poolPromise;
     const result = await pool.request().query(`
       SELECT
-        de.id_articulo,
-        a.nombre_articulo,
-        u.nombre_unidad,
-        SUM(de.cantidad_restante) AS total_restante
-      FROM DonacionesEnEspecie de
-      JOIN CatalogoDeArticulos a 
-        ON de.id_articulo = a.id_articulo
-      JOIN UnidadesDeMedida u 
-        ON de.id_unidad = u.id_unidad
-      WHERE de.cantidad_restante > 0
-      GROUP BY de.id_articulo, a.nombre_articulo, u.nombre_unidad
-      ORDER BY a.nombre_articulo;
+      de.id_articulo,
+      a.nombre_articulo,
+      CAST(a.descripcion AS VARCHAR(MAX)) AS descripcion,
+      u.nombre_unidad,
+      u.simbolo AS medida_abreviada,
+      SUM(de.cantidad_restante) AS total_restante
+    FROM DonacionesEnEspecie de
+    JOIN CatalogoDeArticulos a 
+      ON de.id_articulo = a.id_articulo
+    JOIN UnidadesDeMedida u 
+      ON de.id_unidad = u.id_unidad
+    WHERE de.cantidad_restante > 0
+    GROUP BY 
+      de.id_articulo, 
+      a.nombre_articulo, 
+      CAST(a.descripcion AS VARCHAR(MAX)), 
+      u.nombre_unidad, 
+      u.simbolo
+    ORDER BY a.nombre_articulo;
     `);
     return result.recordset;
   }
+
+  static async actualizarEspacio(id_donacion_especie, id_espacio) {
+    const pool = await poolPromise;
+    await pool.request()
+        .input('id_donacion_especie', sql.Int, id_donacion_especie)
+        .input('id_espacio', sql.Int, id_espacio)
+        .query(`
+            UPDATE DonacionesEnEspecie
+            SET id_espacio = @id_espacio
+            WHERE id_donacion_especie = @id_donacion_especie
+        `);
+  }
+
 
 
 }
