@@ -1,4 +1,4 @@
-const DonacionesRopaModel = require('../models/DonacionesRopaModel');
+const DonacionesRopaModel = require('../models/donacionesRopaModel');
 
 class DonacionesRopaController {
 
