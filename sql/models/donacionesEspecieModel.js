@@ -192,6 +192,38 @@ class DonacionesEnEspecieModel {
     return result.recordset;
   }
 
+  static async getStockPorArticuloPorId(id_articulo) {
+  const pool = await poolPromise;
+  const result = await pool.request()
+    .input('id_articulo', sql.Int, id_articulo)
+    .query(`
+      SELECT
+        de.id_articulo,
+        a.nombre_articulo,
+        CAST(a.descripcion AS VARCHAR(MAX)) AS descripcion,
+        u.nombre_unidad,
+        u.simbolo AS medida_abreviada,
+        SUM(de.cantidad_restante) AS total_restante
+      FROM DonacionesEnEspecie de
+      JOIN CatalogoDeArticulos a 
+        ON de.id_articulo = a.id_articulo
+      JOIN UnidadesDeMedida u 
+        ON de.id_unidad = u.id_unidad
+      WHERE 
+        de.cantidad_restante > 0
+        AND de.id_articulo = @id_articulo
+      GROUP BY 
+        de.id_articulo, 
+        a.nombre_articulo, 
+        CAST(a.descripcion AS VARCHAR(MAX)), 
+        u.nombre_unidad, 
+        u.simbolo
+      ORDER BY a.nombre_articulo;
+    `);
+    return result.recordset;
+  }
+
+
   static async actualizarEspacio(id_donacion_especie, id_espacio) {
     const pool = await poolPromise;
     await pool.request()

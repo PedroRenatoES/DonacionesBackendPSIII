@@ -43,6 +43,21 @@ class InventarioController {
       res.status(500).send('Error interno del servidor');
     }
   }
+
+  static async getStockPorArticuloPorId(req, res) {
+    try {
+      const { id } = req.params;
+      const datos = await DonacionesEnEspecieModel.getStockPorArticuloPorId(parseInt(id));
+      res.json(datos);
+    } catch (err) {
+      console.error('Error en InventarioController.getStockPorArticuloPorId:', err);
+      res.status(500).send('Error interno del servidor');
+    }
+  }
+
+  
+
+  
 }
 
 module.exports = InventarioController;
