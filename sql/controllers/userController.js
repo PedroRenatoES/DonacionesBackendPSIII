@@ -23,8 +23,37 @@ class UserController {
     
     static async create(req, res) {
         try {
-            const { nombres, apellido_paterno, apellido_materno, fecha_nacimiento, direccion_domiciliaria, correo, contraseña, telefono, id_rol } = req.body;
-            await UserModel.create(nombres, apellido_paterno, apellido_materno, fecha_nacimiento, direccion_domiciliaria, correo, contraseña, telefono, id_rol);
+            const {
+                nombres,
+                apellido_paterno,
+                apellido_materno,
+                fecha_nacimiento,
+                direccion_domiciliaria,
+                correo,
+                contrasena,
+                telefono,
+                id_rol,
+                ci,
+                foto_ci,
+                licencia_conducir,
+                foto_licencia
+            } = req.body;
+
+            await UserModel.create(
+                nombres,
+                apellido_paterno,
+                apellido_materno,
+                fecha_nacimiento,
+                direccion_domiciliaria,
+                correo,
+                contrasena,
+                telefono,
+                id_rol,
+                ci,
+                foto_ci,
+                licencia_conducir,
+                foto_licencia
+            );
             res.status(201).json({ message: 'User created successfully' });
         } catch (error) {
             console.error(error);
@@ -35,10 +64,41 @@ class UserController {
     static async update(req, res) {
         try {
             const { id } = req.params;
-            const { nombres, apellido_paterno, apellido_materno, fecha_nacimiento, direccion_domiciliaria, correo, contraseña, telefono, id_rol } = req.body;
-            await UserModel.update(id, nombres, apellido_paterno, apellido_materno, fecha_nacimiento, direccion_domiciliaria, correo, contraseña, telefono, id_rol);
+            const {
+                nombres,
+                apellido_paterno,
+                apellido_materno,
+                fecha_nacimiento,
+                direccion_domiciliaria,
+                correo,
+                contrasena,
+                telefono,
+                id_rol,
+                ci,
+                foto_ci,
+                licencia_conducir,
+                foto_licencia
+            } = req.body;
+
+            await UserModel.update(
+                id,
+                nombres,
+                apellido_paterno,
+                apellido_materno,
+                fecha_nacimiento,
+                direccion_domiciliaria,
+                correo,
+                contrasena,
+                telefono,
+                id_rol,
+                ci,
+                foto_ci,
+                licencia_conducir,
+                foto_licencia
+            );
             res.json({ message: 'User updated successfully' });
         } catch (error) {
+            console.error(error);
             res.status(500).json({ error: 'Error updating user' });
         }
     }

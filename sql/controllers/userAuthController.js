@@ -3,23 +3,23 @@ const UserModel = require('../models/userModel');
 
 class AuthController {
     static async login(req, res) {
-        const { correo, contraseña } = req.body;
+        const { ci, contrasena } = req.body;
 
         try {
-            const user = await UserModel.getByEmail(correo);
+            const user = await UserModel.getByCi(ci);
 
             if (!user) {
                 return res.status(404).json({ error: 'Usuario no encontrado' });
             }
 
-            if (user.contraseña !== contraseña) {
+            if (user.contrasena !== contrasena) {
                 return res.status(401).json({ error: 'Contraseña incorrecta' });
             }
 
             const token = jwt.sign(
                 {
                     id: user.id_usuario,
-                    correo: user.correo,
+                    ci: user.ci,
                     rol: user.id_rol
                 },
                 process.env.JWT_SECRET,
@@ -32,7 +32,7 @@ class AuthController {
                 usuario: {
                     id: user.id_usuario,
                     nombres: user.nombres,
-                    correo: user.correo,
+                    ci: user.ci,
                     rol: user.id_rol
                 }
             });
