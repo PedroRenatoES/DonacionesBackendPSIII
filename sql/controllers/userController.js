@@ -76,7 +76,7 @@ class UserController {
     static async createSimple(req, res) {
         try {
             const {
-                nombres,
+                nombre,
                 apellido,
                 email,
                 ci,
@@ -84,7 +84,7 @@ class UserController {
                 telefono
             } = req.body;
 
-            await UserModel.createSimple(nombres, apellido, email, ci, password, telefono);
+            await UserModel.createSimple(nombre, apellido, email, ci, password, telefono);
 
             res.status(201).json({ message: 'Usuario creado con datos mínimos' });
         } catch (error) {
