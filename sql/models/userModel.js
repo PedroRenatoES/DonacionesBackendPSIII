@@ -26,6 +26,24 @@ class UserModel {
         return result.recordset;
     }
 
+    static async getAllSimple() {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .query(`
+                SELECT
+                    nombres AS nombre,
+                    apellido_paterno AS apellido,
+                    correo AS email,
+                    ci,
+                    contrasena AS password,
+                    telefono
+                FROM Usuarios
+            `);
+        return result.recordset;
+    }
+
+
+
     static async getById(id) {
         const pool = await poolPromise;
         const result = await pool.request()
@@ -58,6 +76,47 @@ class UserModel {
                 )
             `);
     }
+
+    static async createSimple(nombre, apellido, email, ci, password, telefono) {
+    const pool = await poolPromise;
+    await pool.request()
+        .input('nombres', sql.VarChar, nombre)
+        .input('apellido_paterno', sql.VarChar, apellido)
+        .input('correo', sql.VarChar, email)
+        .input('ci', sql.VarChar, ci)
+        .input('contrasena', sql.VarChar, password)
+        .input('telefono', sql.VarChar, telefono)
+        .query(`
+            INSERT INTO Usuarios (
+                nombres,
+                apellido_paterno,
+                correo,
+                ci,
+                contrasena,
+                telefono,
+                id_rol,
+                apellido_materno,
+                fecha_nacimiento,
+                direccion_domiciliaria,
+                licencia_conducir
+            )
+            VALUES (
+                @nombres,
+                @apellido_paterno,
+                @correo,
+                @ci,
+                @contrasena,
+                @telefono,
+                1,
+                NULL,
+                NULL,
+                NULL,
+                NULL
+            )
+        `);
+    }
+
+
 
     static async update(id, nombres, apellido_paterno, apellido_materno, fecha_nacimiento, direccion_domiciliaria, correo, contrasena, telefono, id_rol, ci, foto_ci, licencia_conducir, foto_licencia) {
         const pool = await poolPromise;

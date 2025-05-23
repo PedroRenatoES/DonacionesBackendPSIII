@@ -10,6 +10,17 @@ class UserController {
         }
     }
 
+    static async getAllSimple(req, res) {
+        try {
+            const users = await UserModel.getAllSimple();
+            res.json(users);
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: 'Error al obtener usuarios simples' });
+        }
+    }
+
+
     static async getById(req, res) {
         try {
             const { id } = req.params;
@@ -58,6 +69,27 @@ class UserController {
         } catch (error) {
             console.error(error);
             res.status(500).json({ error: 'Error creating user' });
+        }
+    }
+
+
+    static async createSimple(req, res) {
+        try {
+            const {
+                nombres,
+                apellido,
+                email,
+                ci,
+                password,
+                telefono
+            } = req.body;
+
+            await UserModel.createSimple(nombres, apellido, email, ci, password, telefono);
+
+            res.status(201).json({ message: 'Usuario creado con datos mínimos' });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: 'Error creando usuario con datos mínimos' });
         }
     }
 
