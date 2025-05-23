@@ -220,8 +220,11 @@ class DonacionesEnEspecieModel {
         u.simbolo
       ORDER BY a.nombre_articulo;
     `);
-    return result.recordset;
-  }
+
+  // Retorna solo el primer (y único) objeto, o null si no hay resultados
+  return result.recordset[0] || null;
+}
+
 
 
   static async actualizarEspacio(id_donacion_especie, id_espacio) {

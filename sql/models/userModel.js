@@ -1,4 +1,5 @@
 const { sql, poolPromise } = require(require('../config').dbConnection);
+const axios = require('axios');
 
 class UserModel {
     static async getAll() {
@@ -78,7 +79,7 @@ class UserModel {
 
             try {
                 await axios.post('http://34.9.138.238:2020/global_registro/alasD', {
-                    nombres: nombres,
+                    nombre: nombres,
                     apellido: `${apellido_paterno} ${apellido_materno}`,
                     email: correo,
                     ci: ci,
