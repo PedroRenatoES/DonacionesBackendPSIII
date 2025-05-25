@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.get('/', authenticateToken, PedidosDeAyudaController.getAll);
 router.get('/:id', authenticateToken, PedidosDeAyudaController.getById);
-router.post('/', authenticateToken, PedidosDeAyudaController.create);
+router.post('/', PedidosDeAyudaController.create);
 router.put('/:id', authenticateToken, PedidosDeAyudaController.update);
 router.delete('/:id', authenticateToken, PedidosDeAyudaController.delete);
 
