@@ -26,8 +26,6 @@ class PedidosDeAyudaController {
             const {
                 fecha_pedido,
                 descripcion,
-                estado_pedido,
-                id_donante,
                 ubicacion,
                 latitud_destino,
                 longitud_destino,
@@ -37,8 +35,6 @@ class PedidosDeAyudaController {
             await PedidosDeAyudaModel.create(
                 fecha_pedido,
                 descripcion,
-                estado_pedido,
-                id_donante,
                 ubicacion,
                 latitud_destino,
                 longitud_destino,
@@ -51,6 +47,7 @@ class PedidosDeAyudaController {
             res.status(500).json({ error: 'Error creando pedido de ayuda' });
         }
     }
+
 
 
     static async update(req, res) {
