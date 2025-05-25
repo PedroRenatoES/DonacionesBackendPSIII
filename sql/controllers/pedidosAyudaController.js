@@ -30,7 +30,8 @@ class PedidosDeAyudaController {
                 id_donante,
                 ubicacion,
                 latitud_destino,
-                longitud_destino
+                longitud_destino,
+                id_donacion
             } = req.body;
 
             await PedidosDeAyudaModel.create(
@@ -40,7 +41,8 @@ class PedidosDeAyudaController {
                 id_donante,
                 ubicacion,
                 latitud_destino,
-                longitud_destino
+                longitud_destino,
+                id_donacion
             );
 
             res.status(201).json({ message: 'Pedido de ayuda creado' });
@@ -49,6 +51,7 @@ class PedidosDeAyudaController {
             res.status(500).json({ error: 'Error creando pedido de ayuda' });
         }
     }
+
 
     static async update(req, res) {
         try {
