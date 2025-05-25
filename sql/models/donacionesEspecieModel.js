@@ -166,31 +166,36 @@ class DonacionesEnEspecieModel {
   }
 
   static async getStockPorArticulo() {
-    const pool = await poolPromise;
-    const result = await pool.request().query(`
-      SELECT
+  const pool = await poolPromise;
+  const result = await pool.request().query(`
+    SELECT
       de.id_articulo,
       a.nombre_articulo,
       CAST(a.descripcion AS VARCHAR(MAX)) AS descripcion,
       u.nombre_unidad,
       u.simbolo AS medida_abreviada,
+      c.cantidad_estimada_por_persona,
       SUM(de.cantidad_restante) AS total_restante
     FROM DonacionesEnEspecie de
     JOIN CatalogoDeArticulos a 
       ON de.id_articulo = a.id_articulo
     JOIN UnidadesDeMedida u 
       ON de.id_unidad = u.id_unidad
+    JOIN CategoriasDeArticulos c
+      ON a.id_categoria = c.id_categoria
     WHERE de.cantidad_restante > 0
     GROUP BY 
       de.id_articulo, 
       a.nombre_articulo, 
       CAST(a.descripcion AS VARCHAR(MAX)), 
       u.nombre_unidad, 
-      u.simbolo
+      u.simbolo,
+      c.cantidad_estimada_por_persona
     ORDER BY a.nombre_articulo;
-    `);
-    return result.recordset;
-  }
+  `);
+  return result.recordset;
+}
+
 
   static async getStockPorArticuloPorId(id_articulo) {
   const pool = await poolPromise;
@@ -203,12 +208,15 @@ class DonacionesEnEspecieModel {
         CAST(a.descripcion AS VARCHAR(MAX)) AS descripcion,
         u.nombre_unidad,
         u.simbolo AS medida_abreviada,
-        SUM(de.cantidad_restante) AS total_restante
+        SUM(de.cantidad_restante) AS total_restante,
+        c.cantidad_estimada_por_persona
       FROM DonacionesEnEspecie de
       JOIN CatalogoDeArticulos a 
         ON de.id_articulo = a.id_articulo
       JOIN UnidadesDeMedida u 
         ON de.id_unidad = u.id_unidad
+      JOIN CategoriasDeArticulos c
+        ON a.id_categoria = c.id_categoria
       WHERE 
         de.cantidad_restante > 0
         AND de.id_articulo = @id_articulo
@@ -217,7 +225,8 @@ class DonacionesEnEspecieModel {
         a.nombre_articulo, 
         CAST(a.descripcion AS VARCHAR(MAX)), 
         u.nombre_unidad, 
-        u.simbolo
+        u.simbolo,
+        c.cantidad_estimada_por_persona
       ORDER BY a.nombre_articulo;
     `);
 

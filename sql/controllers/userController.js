@@ -109,7 +109,8 @@ class UserController {
                 ci,
                 foto_ci,
                 licencia_conducir,
-                foto_licencia
+                foto_licencia,
+                estado
             } = req.body;
 
             await UserModel.update(
@@ -126,14 +127,17 @@ class UserController {
                 ci,
                 foto_ci,
                 licencia_conducir,
-                foto_licencia
+                foto_licencia,
+                estado
             );
+
             res.json({ message: 'User updated successfully' });
         } catch (error) {
             console.error(error);
             res.status(500).json({ error: 'Error updating user' });
         }
     }
+
 
     static async delete(req, res) {
         try {

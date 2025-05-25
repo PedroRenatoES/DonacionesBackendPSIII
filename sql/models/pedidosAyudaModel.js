@@ -15,16 +15,37 @@ class PedidosDeAyudaModel {
         return result.recordset[0];
     }
 
-    static async create(fecha_pedido, descripcion, estado_pedido, id_donante, ubicacion) {
+    static async create(fecha_pedido, descripcion, estado_pedido, id_donante, ubicacion, latitud_destino, longitud_destino) {
         const pool = await poolPromise;
         await pool.request()
-            .input('fecha_pedido', sql.DateTime, fecha_pedido)
+            .input('fecha_pedido', sql.Date, fecha_pedido)
             .input('descripcion', sql.Text, descripcion)
             .input('estado_pedido', sql.VarChar, estado_pedido)
             .input('id_donante', sql.Int, id_donante)
-            .input('ubicacion', sql.Text, ubicacion)    // NUEVO: campo ubicacion
-            .query('INSERT INTO PedidosDeAyuda (fecha_pedido, descripcion, estado_pedido, id_donante, ubicacion) VALUES (@fecha_pedido, @descripcion, @estado_pedido, @id_donante, @ubicacion)');
+            .input('ubicacion', sql.Text, ubicacion)
+            .input('latitud_destino', sql.Decimal(10, 7), latitud_destino)
+            .input('longitud_destino', sql.Decimal(10, 7), longitud_destino)
+            .query(`
+                INSERT INTO PedidosDeAyuda (
+                    fecha_pedido,
+                    descripcion,
+                    estado_pedido,
+                    id_donante,
+                    ubicacion,
+                    latitud_destino,
+                    longitud_destino
+                ) VALUES (
+                    @fecha_pedido,
+                    @descripcion,
+                    @estado_pedido,
+                    @id_donante,
+                    @ubicacion,
+                    @latitud_destino,
+                    @longitud_destino
+                )
+            `);
     }
+
 
     static async update(id, fecha_pedido, descripcion, estado_pedido, id_donante, ubicacion) {
         const pool = await poolPromise;

@@ -71,25 +71,24 @@ class UserModel {
             .input('foto_licencia', sql.VarChar(sql.MAX), foto_licencia)
             .query(`
                 INSERT INTO Usuarios (
-                    nombres, apellido_paterno, apellido_materno, fecha_nacimiento, direccion_domiciliaria, correo, contrasena, telefono, id_rol, ci, foto_ci, licencia_conducir, foto_licencia
+                    nombres, apellido_paterno, apellido_materno, fecha_nacimiento, direccion_domiciliaria, correo, contrasena, telefono, id_rol, ci, foto_ci, licencia_conducir, foto_licencia, estado
                 ) VALUES (
-                    @nombres, @apellido_paterno, @apellido_materno, @fecha_nacimiento, @direccion_domiciliaria, @correo, @contrasena, @telefono, @id_rol, @ci, @foto_ci, @licencia_conducir, @foto_licencia
+                    @nombres, @apellido_paterno, @apellido_materno, @fecha_nacimiento, @direccion_domiciliaria, @correo, @contrasena, @telefono, @id_rol, @ci, @foto_ci, @licencia_conducir, @foto_licencia, 1
                 )
             `);
 
-            try {
-                await axios.post('http://34.9.138.238:2020/global_registro/alasD', {
-                    nombre: nombres,
-                    apellido: `${apellido_paterno} ${apellido_materno}`,
-                    email: correo,
-                    ci: ci,
-                    password: contrasena,
-                    telefono: telefono
-                });
-            } catch (error) {
-                console.error('Error enviando datos al endpoint externo:', error.message);
-            }
-
+        try {
+            await axios.post('http://34.9.138.238:2020/global_registro/alasD', {
+                nombre: nombres,
+                apellido: `${apellido_paterno} ${apellido_materno}`,
+                email: correo,
+                ci: ci,
+                password: contrasena,
+                telefono: telefono
+            });
+        } catch (error) {
+            console.error('Error enviando datos al endpoint externo:', error.message);
+        }
     }
 
     static async createSimple(nombre, apellido, email, ci, password, telefono) {
@@ -113,7 +112,8 @@ class UserModel {
                 apellido_materno,
                 fecha_nacimiento,
                 direccion_domiciliaria,
-                licencia_conducir
+                licencia_conducir,
+                estado
             )
             VALUES (
                 @nombres,
@@ -126,14 +126,16 @@ class UserModel {
                 NULL,
                 NULL,
                 NULL,
-                NULL
+                NULL,
+                0
             )
         `);
     }
 
 
 
-    static async update(id, nombres, apellido_paterno, apellido_materno, fecha_nacimiento, direccion_domiciliaria, correo, contrasena, telefono, id_rol, ci, foto_ci, licencia_conducir, foto_licencia) {
+
+    static async update(id, nombres, apellido_paterno, apellido_materno, fecha_nacimiento, direccion_domiciliaria, correo, contrasena, telefono, id_rol, ci, foto_ci, licencia_conducir, foto_licencia, estado) {
         const pool = await poolPromise;
         await pool.request()
             .input('id', sql.Int, id)
@@ -150,6 +152,7 @@ class UserModel {
             .input('foto_ci', sql.VarChar(sql.MAX), foto_ci)
             .input('licencia_conducir', sql.VarChar(10), licencia_conducir)
             .input('foto_licencia', sql.VarChar(sql.MAX), foto_licencia)
+            .input('estado', sql.Bit, estado)  // <-- campo booleano
             .query(`
                 UPDATE Usuarios SET
                     nombres = @nombres,
@@ -164,10 +167,12 @@ class UserModel {
                     ci = @ci,
                     foto_ci = @foto_ci,
                     licencia_conducir = @licencia_conducir,
-                    foto_licencia = @foto_licencia
+                    foto_licencia = @foto_licencia,
+                    estado = @estado
                 WHERE id_usuario = @id
             `);
     }
+
 
     static async delete(id) {
         const pool = await poolPromise;

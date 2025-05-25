@@ -23,10 +23,29 @@ class PedidosDeAyudaController {
 
     static async create(req, res) {
         try {
-            const { fecha_pedido, descripcion, estado_pedido, id_donante, ubicacion } = req.body;
-            await PedidosDeAyudaModel.create(fecha_pedido, descripcion, estado_pedido, id_donante, ubicacion); // NUEVO: pasamos ubicacion
+            const {
+                fecha_pedido,
+                descripcion,
+                estado_pedido,
+                id_donante,
+                ubicacion,
+                latitud_destino,
+                longitud_destino
+            } = req.body;
+
+            await PedidosDeAyudaModel.create(
+                fecha_pedido,
+                descripcion,
+                estado_pedido,
+                id_donante,
+                ubicacion,
+                latitud_destino,
+                longitud_destino
+            );
+
             res.status(201).json({ message: 'Pedido de ayuda creado' });
         } catch (error) {
+            console.error(error);
             res.status(500).json({ error: 'Error creando pedido de ayuda' });
         }
     }
