@@ -23,6 +23,8 @@ class UserModel {
                 u.foto_licencia
             FROM Usuarios u
             INNER JOIN Roles r ON u.id_rol = r.id_rol
+            WHERE u.estado = 1;
+
         `);
         return result.recordset;
     }
