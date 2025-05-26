@@ -1,4 +1,5 @@
 const UserModel = require('../models/userModel');
+const PasswordModel = require('../../mongo/models/passwordModel.js');
 
 class UserController {
     static async getAll(req, res) {
@@ -148,6 +149,81 @@ class UserController {
             res.status(500).json({ error: 'Error deleting user' });
         }
     }
+
+    static async activateAndGeneratePassword(req, res) {
+        try {
+            const { id } = req.params;
+            const user = await UserModel.getById(id);
+
+            if (!user) {
+                return res.status(404).json({ error: 'Usuario no encontrado' });
+            }
+
+            const newPassword = UserController.#generateRandomPassword();
+
+            await UserModel.update(
+                id,
+                user.nombres,
+                user.apellido_paterno,
+                user.apellido_materno,
+                user.fecha_nacimiento,
+                user.direccion_domiciliaria,
+                user.correo,
+                newPassword,
+                user.telefono,
+                user.id_rol,
+                user.ci,
+                user.foto_ci,
+                user.licencia_conducir,
+                user.foto_licencia,
+                1
+            );
+
+            await PasswordModel.create({
+                userId: id,
+                password: newPassword
+            });
+
+            return res.json({
+                message: 'Usuario activado y contraseña generada',
+                password: newPassword
+            });
+
+        } catch (error) {
+            console.error('Error activando usuario:', error);
+            res.status(500).json({ error: 'Error al activar usuario' });
+        }
+    }
+
+    
+    static #generateRandomPassword(length = 10) {
+        const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$!';
+        let password = '';
+        for (let i = 0; i < length; i++) {
+            password += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return password;
+    }
+
+    static async updatePassword(req, res) {
+        try {
+            const { id } = req.params;
+            const { newPassword } = req.body;
+
+            if (!newPassword) {
+                return res.status(400).json({ error: 'Nueva contraseña requerida' });
+            }
+
+            await UserModel.updatePasswordOnly(id, newPassword);
+            await PasswordModel.deleteOne({ userId: parseInt(id) });
+
+            res.json({ message: 'Contraseña actualizada y contraseña antigua eliminada de MongoDB' });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: 'Error actualizando la contraseña' });
+        }
+    }
+    
 }
 
 module.exports = UserController;

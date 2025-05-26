@@ -132,9 +132,6 @@ class UserModel {
         `);
     }
 
-
-
-
     static async update(id, nombres, apellido_paterno, apellido_materno, fecha_nacimiento, direccion_domiciliaria, correo, contrasena, telefono, id_rol, ci, foto_ci, licencia_conducir, foto_licencia, estado) {
         const pool = await poolPromise;
         await pool.request()
@@ -182,12 +179,26 @@ class UserModel {
     }
 
     static async getByCi(ci) {
-    const pool = await poolPromise;
-    const result = await pool.request()
-        .input('ci', sql.Int, ci)
-        .query('SELECT * FROM Usuarios WHERE ci = @ci');
-    return result.recordset[0];
-}
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('ci', sql.Int, ci)
+            .query('SELECT * FROM Usuarios WHERE ci = @ci');
+        return result.recordset[0];
+    }
+
+    static async updatePasswordOnly(id, newPassword) {
+        const pool = await poolPromise;
+        await pool.request()
+            .input('id', sql.Int, id)
+            .input('contrasena', sql.VarChar, newPassword)
+            .query(`
+                UPDATE Usuarios 
+                SET contrasena = @contrasena
+                WHERE id_usuario = @id
+            `);
+    }
+
+    
 
 }
 

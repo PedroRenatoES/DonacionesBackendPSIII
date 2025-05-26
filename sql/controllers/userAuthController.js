@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const UserModel = require('../models/userModel');
+const PasswordModel = require('../../mongo/models/passwordModel'); // Modelo de Mongo
 
 class AuthController {
     static async login(req, res) {
@@ -16,6 +17,17 @@ class AuthController {
                 return res.status(401).json({ error: 'Contraseña incorrecta' });
             }
 
+            if (user.estado == 0) {
+                return res.status(401).json({ error: 'Usuario No Activo' });
+            }
+
+            let cambiarPassword = false;
+            const passwordsMongo = await PasswordModel.find({ userId: user.id_usuario });
+
+            if (passwordsMongo.some(pw => pw.password === contrasena)) {
+                cambiarPassword = true;
+            }
+
             const token = jwt.sign(
                 {
                     id: user.id_usuario,
@@ -29,6 +41,7 @@ class AuthController {
             res.status(200).json({
                 message: 'Login exitoso',
                 token,
+                cambiarPassword,
                 usuario: {
                     id: user.id_usuario,
                     nombres: user.nombres,
