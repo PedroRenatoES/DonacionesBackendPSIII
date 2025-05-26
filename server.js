@@ -28,6 +28,7 @@ const donacionesRopaRoutes = require('./sql/routes/donacionesRopaRoutes.js');
 const solicitudesRecoleccion = require('./sql/routes/solicitudesRecoleccionRoutes.js')
 const paquetes = require('./sql/routes/paquetesRoutes.js')
 const reportes = require('./sql/routes/reportesRoutes.js')
+const imagenesCampanasRoutes = require('./mongo/routes/imagenesCampanasRoutes.js');
 
 const PORT = 3000;
 const app = express();
@@ -46,8 +47,6 @@ app.use(cors({
   },
   credentials: true
 }));
-
-
 
 
 app.use(express.json());
@@ -81,6 +80,8 @@ app.use('/api/donacionesRopa', donacionesRopaRoutes);
 app.use('/api/solicitudesRecoleccion', solicitudesRecoleccion);
 app.use('/api/paquetes', paquetes)
 app.use('/api/reportes', reportes)
+app.use('/api/imagenes-campanas', imagenesCampanasRoutes)
+
 
 poolPromise.then(pool => {
   app.listen(PORT, () => {

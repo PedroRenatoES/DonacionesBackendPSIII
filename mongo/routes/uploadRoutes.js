@@ -17,3 +17,4 @@ router.post('/upload', authenticateToken, (req, res) => {
 router.get('/image/:id', authenticateToken, UploadController.getImage);
 
 module.exports = router;
+
