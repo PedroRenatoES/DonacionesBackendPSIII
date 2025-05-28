@@ -29,6 +29,7 @@ const solicitudesRecoleccion = require('./sql/routes/solicitudesRecoleccionRoute
 const paquetes = require('./sql/routes/paquetesRoutes.js')
 const reportes = require('./sql/routes/reportesRoutes.js')
 const imagenesCampanasRoutes = require('./mongo/routes/imagenesCampanasRoutes.js');
+const imagenesCiRoutes = require('./mongo/routes/imagenesCiRoutes.js');
 
 const PORT = 3000;
 const app = express();
@@ -80,8 +81,8 @@ app.use('/api/donacionesRopa', donacionesRopaRoutes);
 app.use('/api/solicitudesRecoleccion', solicitudesRecoleccion);
 app.use('/api/paquetes', paquetes)
 app.use('/api/reportes', reportes)
-app.use('/api/imagenes-campanas', imagenesCampanasRoutes)
-
+app.use('/api/imagenes-campanas   ', imagenesCampanasRoutes)
+app.use('/api/imagenes-ci', imagenesCiRoutes);
 
 poolPromise.then(pool => {
   app.listen(PORT, () => {

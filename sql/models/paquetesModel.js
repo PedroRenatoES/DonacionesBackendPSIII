@@ -235,6 +235,26 @@ class PaquetesModel {
 
     return { success: true, id_paquete };
   }
+
+  static async getDonantesByNombrePaquete(nombre_paquete) {
+    const pool = await poolPromise;
+
+    const result = await pool.request()
+      .input('nombre_paquete', sql.VarChar, nombre_paquete)
+      .query(`
+        SELECT DISTINCT d.id_donante, d.nombres, d.apellido_paterno, d.apellido_materno
+        FROM Paquetes p
+        JOIN PaqueteDonaciones pd ON p.id_paquete = pd.id_paquete
+        JOIN DonacionesEnEspecie deE ON pd.id_donacion_especie = deE.id_donacion_especie
+        JOIN Donaciones don ON deE.id_donacion = don.id_donacion
+        JOIN Donantes d ON don.id_donante = d.id_donante
+        WHERE p.nombre_paquete = @nombre_paquete;
+      `);
+
+    return result.recordset;
+  }
+
+
 }
 
 module.exports = PaquetesModel;

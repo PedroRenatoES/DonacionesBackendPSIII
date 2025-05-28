@@ -82,6 +82,19 @@ class PaquetesController {
       res.status(500).json({ error: 'Error eliminando paquete' });
     }
   }
+
+  static async getDonantesByNombrePaquete(req, res) {
+    try {
+      const { nombre_paquete } = req.params;
+      const donantes = await PaquetesModel.getDonantesByNombrePaquete(nombre_paquete);
+      res.json(donantes);
+    } catch (error) {
+      console.error('Error obteniendo donantes por nombre de paquete:', error);
+      res.status(500).json({ error: 'Error obteniendo donantes por nombre de paquete' });
+    }
+  }
+
+
 }
 
 module.exports = PaquetesController;
