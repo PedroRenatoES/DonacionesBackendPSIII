@@ -20,6 +20,28 @@ class DonacionesEnDineroModel {
         return result.recordset;
     }
 
+     // Obtener donaciones en dinero por id de donante
+ static async getByDonanteId(id_donante) {
+  const pool = await poolPromise;
+  const result = await pool.request()
+    .input('id_donante', sql.Int, id_donante)
+    .query(`
+      SELECT
+        dnd.id_donacion_dinero,
+        dnd.monto,
+        dnd.divisa,
+        dnd.nombre_cuenta,
+        dnd.numero_cuenta,
+        dnd.comprobante_url
+      FROM DonacionesEnDinero dnd
+      INNER JOIN Donaciones d ON dnd.id_donacion = d.id_donacion
+      WHERE d.id_donante = @id_donante;
+    `);
+  return result.recordset;
+}
+ 
+ 
+
     static async getById(id) {
         const pool = await poolPromise;
         const result = await pool.request()

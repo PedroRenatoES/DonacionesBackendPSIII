@@ -10,7 +10,7 @@ class DonacionesEnDineroController {
         }
     }
 
-        // Obtener donaciones en dinero por id de donante
+    // Obtener donaciones en dinero por id de donante
     static async getByDonanteId(req, res) {
       try {
         const { id_donante } = req.params;
