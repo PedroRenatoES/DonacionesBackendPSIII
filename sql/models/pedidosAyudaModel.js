@@ -15,33 +15,37 @@ class PedidosDeAyudaModel {
         return result.recordset[0];
     }
 
-    static async create(fecha_pedido, descripcion, ubicacion, latitud_destino, longitud_destino, id_donacion) {
-        const pool = await poolPromise;
-        await pool.request()
-            .input('fecha_pedido', sql.Date, fecha_pedido)
-            .input('descripcion', sql.Text, descripcion)
-            .input('ubicacion', sql.Text, ubicacion)
-            .input('latitud_destino', sql.Decimal(10, 7), latitud_destino)
-            .input('longitud_destino', sql.Decimal(10, 7), longitud_destino)
-            .input('id_donacion', sql.VarChar(50), id_donacion)
-            .query(`
-                INSERT INTO PedidosDeAyuda (
-                    fecha_pedido,
-                    descripcion,
-                    ubicacion,
-                    latitud_destino,
-                    longitud_destino,
-                    id_donacion
-                ) VALUES (
-                    @fecha_pedido,
-                    @descripcion,
-                    @ubicacion,
-                    @latitud_destino,
-                    @longitud_destino,
-                    @id_donacion
-                )
-            `);
-    }
+static async create(fecha_pedido, descripcion, ubicacion, latitud_destino, longitud_destino, id_donacion) {
+    const pool = await poolPromise;
+    const result = await pool.request()
+        .input('fecha_pedido', sql.Date, fecha_pedido)
+        .input('descripcion', sql.Text, descripcion)
+        .input('ubicacion', sql.Text, ubicacion)
+        .input('latitud_destino', sql.Decimal(10, 7), latitud_destino)
+        .input('longitud_destino', sql.Decimal(10, 7), longitud_destino)
+        .input('id_donacion', sql.VarChar(50), id_donacion)
+        .query(`
+            INSERT INTO PedidosDeAyuda (
+                fecha_pedido,
+                descripcion,
+                ubicacion,
+                latitud_destino,
+                longitud_destino,
+                id_donacion
+            )
+            OUTPUT INSERTED.*
+            VALUES (
+                @fecha_pedido,
+                @descripcion,
+                @ubicacion,
+                @latitud_destino,
+                @longitud_destino,
+                @id_donacion
+            )
+        `);
+
+    return result.recordset[0]; // ← Devuelve el objeto completo, incluyendo el ID generado
+}
 
 
 
