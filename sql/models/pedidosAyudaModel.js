@@ -23,7 +23,7 @@ class PedidosDeAyudaModel {
             .input('ubicacion', sql.Text, ubicacion)
             .input('latitud_destino', sql.Decimal(10, 7), latitud_destino)
             .input('longitud_destino', sql.Decimal(10, 7), longitud_destino)
-            .input('id_donacion', sql.Int, id_donacion)
+            .input('id_donacion', sql.VarChar(50), id_donacion)
             .query(`
                 INSERT INTO PedidosDeAyuda (
                     fecha_pedido,

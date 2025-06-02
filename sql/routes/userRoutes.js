@@ -5,6 +5,7 @@ const authenticateToken = require('../../middleware/authMiddleware');
 const router = express.Router();
 
 router.get('/', UserController.getAll);
+router.get('/inactive/', UserController.getAllInactive);
 router.get('/simple', UserController.getAllSimple);
 router.get('/:id', authenticateToken, UserController.getById);
 router.post('/', UserController.create);

@@ -29,6 +29,34 @@ class UserModel {
         return result.recordset;
     }
 
+
+    static async getAllInactive() {
+        const pool = await poolPromise;
+        const result = await pool.request().query(`
+                SELECT 
+                u.id_usuario,
+                u.nombres,
+                u.apellido_paterno,
+                u.apellido_materno,
+                u.fecha_nacimiento,
+                u.direccion_domiciliaria,
+                u.correo,
+                u.contrasena,
+                u.id_rol,
+                r.nombre_rol,
+                u.telefono,
+                u.ci,
+                u.foto_ci,
+                u.licencia_conducir,
+                u.foto_licencia
+            FROM Usuarios u
+            INNER JOIN Roles r ON u.id_rol = r.id_rol
+            WHERE u.estado = 0;
+
+        `);
+        return result.recordset;
+    }
+
     static async getAllSimple() {
         const pool = await poolPromise;
         const result = await pool.request()
@@ -55,9 +83,9 @@ class UserModel {
         return result.recordset[0];
     }
 
-    static async create(nombres, apellido_paterno, apellido_materno, fecha_nacimiento, direccion_domiciliaria, correo, contrasena, telefono, id_rol, ci, foto_ci, licencia_conducir, foto_licencia) {
+    static async create(nombres, apellido_paterno, apellido_materno, fecha_nacimiento, direccion_domiciliaria, correo, contrasena, telefono, id_rol, ci, foto_ci, licencia_conducir, foto_licencia, estado) {
         const pool = await poolPromise;
-        await pool.request()
+        const result = await pool.request()
             .input('nombres', sql.VarChar, nombres)
             .input('apellido_paterno', sql.VarChar, apellido_paterno)
             .input('apellido_materno', sql.VarChar, apellido_materno)
@@ -71,14 +99,20 @@ class UserModel {
             .input('foto_ci', sql.VarChar(sql.MAX), foto_ci)
             .input('licencia_conducir', sql.VarChar(10), licencia_conducir)
             .input('foto_licencia', sql.VarChar(sql.MAX), foto_licencia)
+            .input('estado', sql.Int, estado)
             .query(`
                 INSERT INTO Usuarios (
                     nombres, apellido_paterno, apellido_materno, fecha_nacimiento, direccion_domiciliaria, correo, contrasena, telefono, id_rol, ci, foto_ci, licencia_conducir, foto_licencia, estado
-                ) VALUES (
-                    @nombres, @apellido_paterno, @apellido_materno, @fecha_nacimiento, @direccion_domiciliaria, @correo, @contrasena, @telefono, @id_rol, @ci, @foto_ci, @licencia_conducir, @foto_licencia, 1
+                ) 
+                OUTPUT INSERTED.id_usuario
+                VALUES (
+                    @nombres, @apellido_paterno, @apellido_materno, @fecha_nacimiento, @direccion_domiciliaria, @correo, @contrasena, @telefono, @id_rol, @ci, @foto_ci, @licencia_conducir, @foto_licencia, @estado
                 )
             `);
 
+        const id_usuario = result.recordset[0].id_usuario;
+
+        // Intento de registro externo
         try {
             await axios.post('http://34.9.138.238:2020/global_registro/alasD', {
                 nombre: nombres,
@@ -91,7 +125,10 @@ class UserModel {
         } catch (error) {
             console.error('Error enviando datos al endpoint externo:', error.message);
         }
+
+        return id_usuario;
     }
+
 
     static async createSimple(nombre, apellido, email, ci, password, telefono) {
     const pool = await poolPromise;

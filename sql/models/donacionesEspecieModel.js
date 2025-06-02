@@ -75,7 +75,24 @@ class DonacionesEnEspecieModel {
     return result.recordset;
   }
 
-
+  static async getDonantesPorArticulo(id_articulo) {
+    const pool = await poolPromise;
+    const result = await pool.request()
+      .input('id_articulo', sql.Int, id_articulo)
+      .query(`
+        SELECT 
+          don.nombres,
+          don.apellido_paterno,
+          don.apellido_materno,
+          dee.cantidad,
+          dee.cantidad_restante
+        FROM DonacionesEnEspecie dee
+        INNER JOIN Donaciones d ON dee.id_donacion = d.id_donacion
+        INNER JOIN Donantes don ON d.id_donante = don.id_donante
+        WHERE dee.id_articulo = @id_articulo
+      `);
+    return result.recordset;
+  }
     static async create(id_donacion, id_articulo, cantidad, estado_articulo, destino_donacion, fila = null, columna = null, estante = null) {
         const pool = await poolPromise;
         await pool.request()

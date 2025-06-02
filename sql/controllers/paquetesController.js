@@ -47,6 +47,17 @@ class PaquetesController {
     }
   }
 
+  static async getAllWithDonaciones(req, res) {
+    try {
+      const paquetes = await PaquetesModel.getAllWithDonaciones();
+      res.json(paquetes);
+    } catch (error) {
+      console.error('Error al obtener paquetes con donaciones:', error);
+      res.status(500).json({ error: 'Error al obtener los paquetes' });
+    }
+  }
+
+
   // PUT /paquetes/:id
   static async update(req, res) {
     try {

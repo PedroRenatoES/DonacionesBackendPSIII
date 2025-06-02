@@ -149,6 +149,53 @@ class PaquetesModel {
     return paquete;
   }
 
+  static async getAllWithDonaciones() {
+    const pool = await poolPromise;
+    const result = await pool.request().query(`
+      SELECT 
+        p.id_paquete,
+        p.nombre_paquete,
+        p.descripcion,
+        p.fecha_creacion,
+        p.id_pedido,
+
+        pd.id_donacion_especie,
+        pd.cantidad_asignada
+      FROM Paquetes p
+      LEFT JOIN PaqueteDonaciones pd ON p.id_paquete = pd.id_paquete
+    `);
+
+    // Agrupar resultados por paquete
+    const paquetesMap = {};
+
+    result.recordset.forEach(row => {
+      const {
+        id_paquete, nombre_paquete, descripcion, fecha_creacion, id_pedido,
+        id_donacion_especie, cantidad_asignada
+      } = row;
+
+      if (!paquetesMap[id_paquete]) {
+        paquetesMap[id_paquete] = {
+          id_paquete,
+          nombre_paquete,
+          descripcion,
+          fecha_creacion,
+          id_pedido,
+          donaciones: []
+        };
+      }
+
+      if (id_donacion_especie !== null) {
+        paquetesMap[id_paquete].donaciones.push({
+          id_donacion_especie,
+          cantidad_asignada
+        });
+      }
+    });
+
+    return Object.values(paquetesMap);
+  }
+
   // Actualizar datos básicos y items de un paquete
   static async update(id_paquete, nombre_paquete, descripcion, id_pedido, donaciones = []) {
     const pool = await poolPromise;

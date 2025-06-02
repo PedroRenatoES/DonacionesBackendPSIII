@@ -3,6 +3,7 @@ const router = express.Router();
 const PaquetesController = require('../controllers/paquetesController');
 
 router.post('/', PaquetesController.create);
+router.get('/completados', PaquetesController.getAllWithDonaciones);
 router.get('/', PaquetesController.getAll);
 router.get('/:id', PaquetesController.getById);
 router.get('/donantes/:nombre_paquete', PaquetesController.getDonantesByNombrePaquete);

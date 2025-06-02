@@ -45,6 +45,21 @@ static async getByCampanaId(req, res) {
     }
 }
 
+static async getDonantesPorArticulo(req, res) {
+    const id_articulo = parseInt(req.params.id);
+    if (isNaN(id_articulo)) {
+        return res.status(400).json({ message: 'ID de artículo inválido' });
+    }
+
+    try {
+        const donantes = await DonacionesEnEspecieModel.getDonantesPorArticulo(id_articulo);
+        res.json(donantes);
+    } catch (error) {
+        console.error('Error al obtener donantes por artículo:', error);
+        res.status(500).json({ message: 'Error del servidor' });
+        }
+    }
+
 
     static async create(req, res) {
         try {

@@ -1,10 +1,23 @@
 const UserModel = require('../models/userModel');
 const PasswordModel = require('../../mongo/models/passwordModel.js');
+const bcrypt = require('bcrypt');
+const saltRounds = 10; // puedes ajustar este número
+const enviarCorreo = require('./emailService'); // ruta según tu estructura
+
 
 class UserController {
     static async getAll(req, res) {
         try {
             const users = await UserModel.getAll();
+            res.json(users);
+        } catch (error) {
+            res.status(500).json({ error: 'Error getting users' });
+        }
+    }
+
+    static async getAllInactive(req, res) {
+        try {
+            const users = await UserModel.getAllInactive();
             res.json(users);
         } catch (error) {
             res.status(500).json({ error: 'Error getting users' });
@@ -33,6 +46,7 @@ class UserController {
         }
     }
     
+    
     static async create(req, res) {
         try {
             const {
@@ -48,31 +62,37 @@ class UserController {
                 ci,
                 foto_ci,
                 licencia_conducir,
-                foto_licencia
+                foto_licencia,
+                estado
             } = req.body;
 
-            await UserModel.create(
+            const hashedPassword = await bcrypt.hash(contrasena, saltRounds);
+
+            const id_usuario = await UserModel.create(
                 nombres,
                 apellido_paterno,
                 apellido_materno,
                 fecha_nacimiento,
                 direccion_domiciliaria,
                 correo,
-                contrasena,
+                hashedPassword,
                 telefono,
                 id_rol,
                 ci,
                 foto_ci,
                 licencia_conducir,
-                foto_licencia
+                foto_licencia,
+                estado
             );
-            res.status(201).json({ message: 'User created successfully' });
+
+            res.status(201).json({ message: 'User created successfully', id_usuario });
         } catch (error) {
             console.error(error);
             res.status(500).json({ error: 'Error creating user' });
         }
     }
 
+    
 
     static async createSimple(req, res) {
         try {
@@ -84,15 +104,18 @@ class UserController {
                 password,
                 telefono
             } = req.body;
-
-            await UserModel.createSimple(nombre, apellido, email, ci, password, telefono);
-
+    
+            const hashedPassword = await bcrypt.hash(password, saltRounds);
+    
+            await UserModel.createSimple(nombre, apellido, email, ci, hashedPassword, telefono);
+    
             res.status(201).json({ message: 'Usuario creado con datos mínimos' });
         } catch (error) {
             console.error(error);
             res.status(500).json({ error: 'Error creando usuario con datos mínimos' });
         }
     }
+    
 
     static async update(req, res) {
         try {
@@ -114,6 +137,11 @@ class UserController {
                 estado
             } = req.body;
 
+            // Encriptar contraseña si viene en la solicitud
+            const hashedPassword = contrasena
+                ? await bcrypt.hash(contrasena, saltRounds)
+                : undefined;
+
             await UserModel.update(
                 id,
                 nombres,
@@ -122,7 +150,7 @@ class UserController {
                 fecha_nacimiento,
                 direccion_domiciliaria,
                 correo,
-                contrasena,
+                hashedPassword || contrasena,
                 telefono,
                 id_rol,
                 ci,
@@ -138,7 +166,6 @@ class UserController {
             res.status(500).json({ error: 'Error updating user' });
         }
     }
-
 
     static async delete(req, res) {
         try {
@@ -159,7 +186,12 @@ class UserController {
                 return res.status(404).json({ error: 'Usuario no encontrado' });
             }
 
+            if (user.estado === 1) {
+                return res.status(400).json({ error: 'El usuario ya está activo' });
+            }
+
             const newPassword = UserController.#generateRandomPassword();
+            const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
 
             await UserModel.update(
                 id,
@@ -169,20 +201,26 @@ class UserController {
                 user.fecha_nacimiento,
                 user.direccion_domiciliaria,
                 user.correo,
-                newPassword,
+                hashedPassword,
                 user.telefono,
                 user.id_rol,
                 user.ci,
                 user.foto_ci,
                 user.licencia_conducir,
                 user.foto_licencia,
-                1
+                1 // Activar usuario
             );
 
             await PasswordModel.create({
                 userId: id,
-                password: newPassword
+                password: hashedPassword
             });
+
+            await enviarCorreo({
+                to: user.correo,
+                subject: 'Tu cuenta ha sido activada',
+                text: `Hola ${user.nombres}, tu cuenta ha sido activada.\n\nTu contraseña temporal es: ${newPassword}\n\nPor favor cámbiala al iniciar sesión.`,
+              });          
 
             return res.json({
                 message: 'Usuario activado y contraseña generada',
@@ -195,7 +233,7 @@ class UserController {
         }
     }
 
-    
+
     static #generateRandomPassword(length = 10) {
         const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$!';
         let password = '';
@@ -214,7 +252,10 @@ class UserController {
                 return res.status(400).json({ error: 'Nueva contraseña requerida' });
             }
 
-            await UserModel.updatePasswordOnly(id, newPassword);
+            const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+
+            await UserModel.updatePasswordOnly(id, hashedPassword);
+
             await PasswordModel.deleteOne({ userId: parseInt(id) });
 
             res.json({ message: 'Contraseña actualizada y contraseña antigua eliminada de MongoDB' });
@@ -223,7 +264,6 @@ class UserController {
             res.status(500).json({ error: 'Error actualizando la contraseña' });
         }
     }
-    
 }
 
 module.exports = UserController;
