@@ -21,36 +21,42 @@ class PedidosDeAyudaController {
         }
     }
 
-  static async create(req, res) {
-    try {
-        const {
-            fecha_pedido,
-            descripcion,
-            ubicacion,
-            latitud_destino,
-            longitud_destino,
-            id_donacion
-        } = req.body;
-
-        const nuevoPedido = await PedidosDeAyudaModel.create({
-            fecha_pedido,
-            descripcion,
-            ubicacion,
-            latitud_destino,
-            longitud_destino,
-            id_donacion
-        });
-
-        res.status(201).json({ 
-            message: 'Pedido de ayuda creado',
-            data: nuevoPedido // Esto ahora devuelve todo el objeto creado
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Error creando pedido de ayuda' });
+    static async create(req, res) {
+        try {
+            const {
+                fecha_pedido,
+                descripcion,
+                ubicacion,
+                latitud_destino,
+                longitud_destino,
+                id_donacion
+            } = req.body;
+   
+            // Crear el nuevo pedido
+            const nuevoPedido = await PedidosDeAyudaModel.create(
+                fecha_pedido,
+                descripcion,
+                ubicacion,
+                latitud_destino,
+                longitud_destino,
+                id_donacion
+            );
+   
+            // Imprimir en consola el pedido recién creado
+            console.log('Pedido creado:', nuevoPedido);
+   
+            // Devolver la respuesta con los datos del pedido creado
+            res.status(201).json({
+                message: 'Pedido de ayuda creado exitosamente',
+                pedido: nuevoPedido // Devuelves el objeto con los detalles del pedido
+            });
+   
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: 'Error creando pedido de ayuda' });
+        }
     }
-}
-
+   
     static async update(req, res) {
         try {
             const { id } = req.params;

@@ -16,39 +16,38 @@ class PedidosDeAyudaModel {
     }
 
 static async create(fecha_pedido, descripcion, ubicacion, latitud_destino, longitud_destino, id_donacion) {
-    const pool = await poolPromise;
-    const result = await pool.request()
-        .input('fecha_pedido', sql.Date, fecha_pedido)
-        .input('descripcion', sql.Text, descripcion)
-        .input('ubicacion', sql.Text, ubicacion)
-        .input('latitud_destino', sql.Decimal(10, 7), latitud_destino)
-        .input('longitud_destino', sql.Decimal(10, 7), longitud_destino)
-        .input('id_donacion', sql.VarChar(50), id_donacion)
-        .query(`
-            INSERT INTO PedidosDeAyuda (
-                fecha_pedido,
-                descripcion,
-                ubicacion,
-                latitud_destino,
-                longitud_destino,
-                id_donacion
-            )
-            OUTPUT INSERTED.*
-            VALUES (
-                @fecha_pedido,
-                @descripcion,
-                @ubicacion,
-                @latitud_destino,
-                @longitud_destino,
-                @id_donacion
-            )
-        `);
-
-    return result.recordset[0]; // ← Devuelve el objeto completo, incluyendo el ID generado
-}
-
-
-
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('fecha_pedido', sql.Date, fecha_pedido)
+            .input('descripcion', sql.Text, descripcion)
+            .input('ubicacion', sql.Text, ubicacion)
+            .input('latitud_destino', sql.Decimal(10, 7), latitud_destino)
+            .input('longitud_destino', sql.Decimal(10, 7), longitud_destino)
+            .input('id_donacion', sql.VarChar(50), id_donacion)
+            .query(`
+                INSERT INTO PedidosDeAyuda (
+                    fecha_pedido,
+                    descripcion,
+                    ubicacion,
+                    latitud_destino,
+                    longitud_destino,
+                    id_donacion
+                )
+                OUTPUT INSERTED.*  -- Esto devolverá el nuevo registro insertado
+                VALUES (
+                    @fecha_pedido,
+                    @descripcion,
+                    @ubicacion,
+                    @latitud_destino,
+                    @longitud_destino,
+                    @id_donacion
+                )
+            `);
+   
+        // Asegúrate de devolver el primer registro insertado
+        return result.recordset[0]; // Esto contiene todos los datos del pedido recién creado
+    }
+ 
 
     static async update(id, fecha_pedido, descripcion, estado_pedido, id_donante, ubicacion) {
         const pool = await poolPromise;
