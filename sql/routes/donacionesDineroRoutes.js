@@ -3,7 +3,7 @@ const DonacionesEnDineroController = require('../controllers/donacionesDineroCon
 const authenticateToken = require('../../middleware/authMiddleware');
 
 const router = express.Router();
-
+router.get('/getAllById/:id_donante', authenticateToken, DonacionesEnDineroController.getByDonanteId);
 router.get('/nombres-cuenta', authenticateToken, DonacionesEnDineroController.getAllNombreCuenta);
 router.get('/numeros-cuenta', authenticateToken, DonacionesEnDineroController.getAllNumeroCuenta);
 router.get('/nombre-cuenta/:nombre_cuenta', authenticateToken, DonacionesEnDineroController.getByNombreCuenta);

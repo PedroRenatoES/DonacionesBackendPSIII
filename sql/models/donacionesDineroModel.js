@@ -85,6 +85,36 @@ static async getByCampanaId(id_campana) {
   return result.recordset;
 }
 
+  static async create(req, res) {
+        try {
+            const {
+                fecha_pedido,
+                descripcion,
+                ubicacion,
+                latitud_destino,
+                longitud_destino,
+                id_donacion
+            } = req.body;
+   
+            const nuevoPedido = await PedidosDeAyudaModel.create(
+                fecha_pedido,
+                descripcion,
+                ubicacion,
+                latitud_destino,
+                longitud_destino,
+                id_donacion
+            );
+   
+            res.status(201).json({ message: 'Pedido de ayuda creado', data: nuevoPedido });
+           
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: 'Error creando pedido de ayuda' });
+        }
+    }
+   
+ 
+
 
 
     static async create(id_donacion, monto, divisa, nombre_cuenta, numero_cuenta, comprobante_url, estado_validacion) {

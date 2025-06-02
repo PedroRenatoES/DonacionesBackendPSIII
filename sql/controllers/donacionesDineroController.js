@@ -10,6 +10,21 @@ class DonacionesEnDineroController {
         }
     }
 
+        // Obtener donaciones en dinero por id de donante
+    static async getByDonanteId(req, res) {
+      try {
+        const { id_donante } = req.params;
+        const donaciones = await DonacionesEnDineroModel.getByDonanteId(id_donante);
+        if (donaciones.length > 0) {
+          res.json(donaciones);
+        } else {
+          res.status(404).json({ error: 'No se encontraron donaciones en dinero para este donante' });
+        }
+      } catch (error) {
+        res.status(500).json({ error: 'Error obteniendo donaciones en dinero por id de donante' });
+      }
+    }
+
     static async getById(req, res) {
         try {
             const { id } = req.params;
