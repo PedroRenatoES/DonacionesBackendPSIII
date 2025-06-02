@@ -21,7 +21,7 @@ class PedidosDeAyudaController {
         }
     }
 
-    static async create(req, res) {
+  static async create(req, res) {
         try {
             const {
                 fecha_pedido,
@@ -31,8 +31,8 @@ class PedidosDeAyudaController {
                 longitud_destino,
                 id_donacion
             } = req.body;
-
-            await PedidosDeAyudaModel.create(
+   
+            const nuevoPedido = await PedidosDeAyudaModel.create(
                 fecha_pedido,
                 descripcion,
                 ubicacion,
@@ -40,14 +40,14 @@ class PedidosDeAyudaController {
                 longitud_destino,
                 id_donacion
             );
-
-            res.status(201).json({ message: 'Pedido de ayuda creado' });
+   
+            res.status(201).json({ message: 'Pedido de ayuda creado', data: nuevoPedido });
+           
         } catch (error) {
             console.error(error);
             res.status(500).json({ error: 'Error creando pedido de ayuda' });
         }
     }
-
 
 
     static async update(req, res) {
