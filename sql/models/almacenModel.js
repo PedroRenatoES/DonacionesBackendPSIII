@@ -46,6 +46,25 @@ class AlmacenModel {
     return result.recordset;
   }
 
+    static async getByAlmacen(id_almacen) {
+    const pool = await poolPromise;
+    const result = await pool.request()
+        .input('id_almacen', sql.Int, id_almacen)
+        .query(`
+            SELECT 
+                es.id_estante,
+                es.nombre AS nombre_estante,
+                sp.id_espacio,
+                sp.codigo AS codigo_espacio,
+                sp.lleno
+            FROM Estante es
+            JOIN Espacios sp ON sp.id_estante = es.id_estante
+            WHERE es.id_almacen = @id_almacen
+            ORDER BY es.id_estante, sp.codigo
+        `);
+    return result.recordset;
+}
+
     static async create(nombre_almacen, ubicacion) {
         const pool = await poolPromise;
         await pool.request()
