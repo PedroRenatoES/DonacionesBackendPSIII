@@ -83,16 +83,40 @@ class PaquetesModel {
   }
 
   // Obtener todos los paquetes (sin detalles de items)
-  static async getAll() {
+static async getAll() {
     const pool = await poolPromise;
     const result = await pool.request()
       .query(`
         SELECT id_paquete, nombre_paquete, descripcion, fecha_creacion
         FROM Paquetes
+        WHERE estado = 0
         ORDER BY fecha_creacion DESC;
       `);
     return result.recordset;
   }
+
+    static async getAllEnviados() {
+  const pool = await poolPromise;
+  const result = await pool.request()
+    .query(`
+      SELECT id_paquete, nombre_paquete, descripcion, fecha_creacion
+      FROM Paquetes
+      WHERE estado = 1
+      ORDER BY fecha_creacion DESC;
+    `);
+  return result.recordset;
+}
+
+static async marcarComoEnviado(id_paquete) {
+  const pool = await poolPromise;
+  await pool.request()
+    .input('id_paquete', sql.Int, id_paquete)
+    .query(`
+      UPDATE Paquetes
+      SET estado = 1
+      WHERE id_paquete = @id_paquete;
+    `);
+}
 
   // Obtener un paquete con sus items detallados y totales por artículo
   static async getById(id_paquete) {
