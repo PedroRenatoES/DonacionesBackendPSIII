@@ -23,9 +23,8 @@ class CajaModel {
         SELECT 
           c.id_caja,
           c.codigo_caja,
-          c.cantidad_maxima,
-          c.cantidad_asignada AS cantidad_asignada_caja,
-          c.estado,
+          c.descripcion,
+          c.cantidad_asignada,
   
           p.id_paquete,
           p.nombre_paquete,
@@ -35,7 +34,6 @@ class CajaModel {
   
           pd.id_donacion_especie,
           pd.cantidad_asignada AS cantidad_asignada_donacion
-  
         FROM Cajas c
         INNER JOIN Paquetes p ON c.id_paquete = p.id_paquete
         LEFT JOIN PaquetesDonaciones pd ON p.id_paquete = pd.id_paquete
@@ -43,40 +41,36 @@ class CajaModel {
       `);
     return result.recordset;
   }
-  
 
-  static async create(codigo_caja, id_paquete, cantidad_maxima, cantidad_asignada, estado) {
+  static async create(codigo_caja, descripcion, id_paquete, cantidad_asignada) {
     const pool = await poolPromise;
     const result = await pool.request()
       .input('codigo_caja', sql.VarChar, codigo_caja)
+      .input('descripcion', sql.VarChar, descripcion)
       .input('id_paquete', sql.Int, id_paquete)
-      .input('cantidad_maxima', sql.Int, cantidad_maxima)
       .input('cantidad_asignada', sql.Int, cantidad_asignada)
-      .input('estado', sql.VarChar, estado)
       .query(`
-        INSERT INTO Cajas (codigo_caja, id_paquete, cantidad_maxima, cantidad_asignada, estado)
+        INSERT INTO Cajas (codigo_caja, descripcion, id_paquete, cantidad_asignada)
         OUTPUT INSERTED.id_caja
-        VALUES (@codigo_caja, @id_paquete, @cantidad_maxima, @cantidad_asignada, @estado)
+        VALUES (@codigo_caja, @descripcion, @id_paquete, @cantidad_asignada)
       `);
     return result.recordset[0].id_caja;
   }
 
-  static async update(id, codigo_caja, id_paquete, cantidad_maxima, cantidad_asignada, estado) {
+  static async update(id, codigo_caja, descripcion, id_paquete, cantidad_asignada) {
     const pool = await poolPromise;
     await pool.request()
       .input('id', sql.Int, id)
       .input('codigo_caja', sql.VarChar, codigo_caja)
+      .input('descripcion', sql.VarChar, descripcion)
       .input('id_paquete', sql.Int, id_paquete)
-      .input('cantidad_maxima', sql.Int, cantidad_maxima)
       .input('cantidad_asignada', sql.Int, cantidad_asignada)
-      .input('estado', sql.VarChar, estado)
       .query(`
         UPDATE Cajas
         SET codigo_caja = @codigo_caja,
+            descripcion = @descripcion,
             id_paquete = @id_paquete,
-            cantidad_maxima = @cantidad_maxima,
-            cantidad_asignada = @cantidad_asignada,
-            estado = @estado
+            cantidad_asignada = @cantidad_asignada
         WHERE id_caja = @id
       `);
   }
