@@ -67,27 +67,16 @@ class PaquetesController {
     }
   }
 
-  static async getPaquetesNoEnviados(req, res) {
+   static async getPaquetesNoEnviados(req, res) {
     try {
-      const pool = await poolPromise;
-      const result = await pool.request()
-        .query(`
-          SELECT id_paquete, nombre_paquete, descripcion, fecha_creacion
-          FROM Paquetes
-          WHERE estado = 1
-            AND id_paquete NOT IN (
-              SELECT DISTINCT id_paquete
-              FROM SalidasAlmacen
-            )
-          ORDER BY fecha_creacion DESC;
-        `);
-      res.json(result.recordset);
+      const paquetes = await PaquetesModel.getPaquetesNoEnviados();
+      res.json(paquetes);
     } catch (error) {
       console.error('Error al obtener paquetes no enviados:', error);
       res.status(500).json({ error: 'Error al obtener paquetes no enviados' });
     }
   }
-
+}
   static async marcarComoEnviado(req, res) {
   try {
     const { id_paquete } = req.body;
