@@ -36,7 +36,7 @@ class CajaModel {
           pd.cantidad_asignada AS cantidad_asignada_donacion
         FROM Cajas c
         INNER JOIN Paquetes p ON c.id_paquete = p.id_paquete
-        LEFT JOIN PaquetesDonaciones pd ON p.id_paquete = pd.id_paquete
+        LEFT JOIN PaqueteDonaciones pd ON p.id_paquete = pd.id_paquete
         WHERE c.id_paquete = @id_paquete
       `);
     return result.recordset;
