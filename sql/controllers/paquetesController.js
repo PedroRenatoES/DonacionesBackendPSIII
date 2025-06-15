@@ -76,7 +76,7 @@ class PaquetesController {
       res.status(500).json({ error: 'Error al obtener paquetes no enviados' });
     }
   }
-}
+
   static async marcarComoEnviado(req, res) {
   try {
     const { id_paquete } = req.body;
