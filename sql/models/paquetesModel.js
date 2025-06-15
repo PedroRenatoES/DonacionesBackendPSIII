@@ -118,6 +118,23 @@ static async marcarComoEnviado(id_paquete) {
     `);
 }
 
+  static async getPaquetesNoEnviados() {
+  const pool = await poolPromise;
+  const result = await pool.request()
+    .query(`
+      SELECT id_paquete, nombre_paquete, descripcion, fecha_creacion
+      FROM Paquetes
+      WHERE estado = 1
+        AND id_paquete NOT IN (
+          SELECT DISTINCT id_paquete
+          FROM SalidasAlmacen
+        )
+      ORDER BY fecha_creacion DESC;
+    `);
+  return result.recordset;
+}
+
+
   // Obtener un paquete con sus items detallados y totales por artículo
   static async getById(id_paquete) {
     const pool = await poolPromise;
