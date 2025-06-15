@@ -39,11 +39,11 @@ const CajaController = {
       res.status(500).json({ error: 'Error al obtener cajas por paquete' });
     }
   },
-  
+
   async create(req, res) {
     try {
-      const { codigo_caja, id_paquete, cantidad_maxima, cantidad_asignada, estado } = req.body;
-      const id = await CajaModel.create(codigo_caja, id_paquete, cantidad_maxima, cantidad_asignada, estado);
+      const { codigo_caja, descripcion, id_paquete, cantidad_asignada } = req.body;
+      const id = await CajaModel.create(codigo_caja, descripcion, id_paquete, cantidad_asignada);
       res.status(201).json({ message: 'Caja creada', id });
     } catch (error) {
       console.error('Error al crear caja:', error);
@@ -53,8 +53,8 @@ const CajaController = {
 
   async update(req, res) {
     try {
-      const { codigo_caja, id_paquete, cantidad_maxima, cantidad_asignada, estado } = req.body;
-      await CajaModel.update(req.params.id, codigo_caja, id_paquete, cantidad_maxima, cantidad_asignada, estado);
+      const { codigo_caja, descripcion, id_paquete, cantidad_asignada } = req.body;
+      await CajaModel.update(req.params.id, codigo_caja, descripcion, id_paquete, cantidad_asignada);
       res.json({ message: 'Caja actualizada' });
     } catch (error) {
       console.error('Error al actualizar caja:', error);
