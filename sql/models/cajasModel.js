@@ -43,19 +43,22 @@ class CajaModel {
   }
 
   static async create(codigo_caja, descripcion, id_paquete, cantidad_asignada) {
-    const pool = await poolPromise;
-    const result = await pool.request()
-      .input('codigo_caja', sql.VarChar, codigo_caja)
-      .input('descripcion', sql.VarChar, descripcion)
-      .input('id_paquete', sql.Int, id_paquete)
-      .input('cantidad_asignada', sql.Int, cantidad_asignada)
-      .query(`
-        INSERT INTO Cajas (codigo_caja, descripcion, id_paquete, cantidad_asignada)
-        OUTPUT INSERTED.id_caja
-        VALUES (@codigo_caja, @descripcion, @id_paquete, @cantidad_asignada)
-      `);
-    return result.recordset[0].id_caja;
-  }
+  console.log('🟡 CajaModel.create() llamado');
+  const pool = await poolPromise;
+  const result = await pool.request()
+    .input('codigo_caja', sql.VarChar, codigo_caja)
+    .input('descripcion', sql.VarChar, descripcion)
+    .input('id_paquete', sql.Int, id_paquete)
+    .input('cantidad_asignada', sql.Int, cantidad_asignada)
+    .query(`
+      INSERT INTO Cajas (codigo_caja, descripcion, id_paquete, cantidad_asignada)
+      OUTPUT INSERTED.id_caja
+      VALUES (@codigo_caja, @descripcion, @id_paquete, @cantidad_asignada)
+    `);
+  console.log('🟢 Caja insertada con ID:', result.recordset[0].id_caja);
+  return result.recordset[0].id_caja;
+}
+
 
   static async update(id, codigo_caja, descripcion, id_paquete, cantidad_asignada) {
     const pool = await poolPromise;
