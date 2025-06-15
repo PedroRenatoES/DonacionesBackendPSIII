@@ -3,7 +3,7 @@ const router = express.Router();
 const PaquetesController = require('../controllers/paquetesController');
 
 router.post('/', PaquetesController.create);
-router.get('/no-enviados', PaqueteController.getPaquetesNoEnviados);
+router.get('/no-enviados', PaquetesController.getPaquetesNoEnviados);
 router.get('/enviados', PaquetesController.getAllEnviados);
 router.get('/completados', PaquetesController.getAllWithDonaciones);
 router.get('/', PaquetesController.getAll);
