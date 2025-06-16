@@ -11,20 +11,29 @@ class SalidasAlmacenController {
     }
   }
 
-  static async create(req, res) {
-    try {
-      const { id_paquete, id_usuario } = req.body;
-      if (!id_paquete || !id_usuario) {
-        return res.status(400).json({ error: 'id_paquete e id_usuario son requeridos' });
-      }
+static async create(req, res) {
+  try {
+    const { id_paquete, id_usuario } = req.body;
 
-      await SalidasAlmacenModel.create(id_paquete, id_usuario);
-      res.status(201).json({ message: 'Salida registrada correctamente' });
-    } catch (error) {
-      console.error('Error al crear salida:', error);
-      res.status(500).json({ error: 'Error al registrar salida' });
+    if (!id_paquete || !id_usuario) {
+      return res.status(400).json({ error: 'id_paquete e id_usuario son requeridos' });
     }
+
+    await SalidasAlmacenModel.create(id_paquete, id_usuario);
+
+    res.status(201).json({
+      message: 'Salida registrada correctamente',
+      data: {
+        id_paquete,
+        id_usuario
+      }
+    });
+  } catch (error) {
+    console.error('Error al crear salida:', error);
+    res.status(500).json({ error: 'Error al registrar salida' });
   }
+}
+
 }
 
 module.exports = SalidasAlmacenController;
