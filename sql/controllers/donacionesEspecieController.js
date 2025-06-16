@@ -122,6 +122,17 @@ static async getDonantesPorArticulo(req, res) {
             res.status(500).json({ error: 'Error actualizando espacio de donación en especie' });
         }
     }
+
+      static async getStockPorEstanteId(req, res) {
+    const { id_estante } = req.params;
+    try {
+      const datos = await DonacionesEnEspecieModel.getStockPorEstanteId(id_estante);
+      res.json(datos);
+    } catch (err) {
+      console.error('Error en getStockPorEstanteId:', err);
+      res.status(500).send('Error interno del servidor');
+    }
+  }
 }
 
 module.exports = DonacionesEnEspecieController;
