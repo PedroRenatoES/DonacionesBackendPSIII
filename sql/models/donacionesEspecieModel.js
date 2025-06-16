@@ -265,6 +265,42 @@ class DonacionesEnEspecieModel {
         `);
   }
 
+    static async getStockPorEstanteId(id_estante) {
+    const pool = await poolPromise;
+    const result = await pool.request()
+      .input('id_estante', sql.Int, id_estante)
+      .query(`
+          SELECT
+          de.id_articulo,
+          a.nombre_articulo,
+          CAST(a.descripcion AS VARCHAR(MAX)) AS descripcion,
+          u.nombre_unidad,
+          u.simbolo AS medida_abreviada,
+          SUM(de.cantidad_restante) AS total_restante,
+          e.id_estante
+        FROM DonacionesEnEspecie de
+        JOIN Espacios es ON de.id_espacio = es.id_espacio
+        JOIN Estante e ON es.id_estante = e.id_estante
+        JOIN CatalogoDeArticulos a ON de.id_articulo = a.id_articulo
+        JOIN UnidadesDeMedida u ON de.id_unidad = u.id_unidad
+        JOIN CategoriasDeArticulos c ON a.id_categoria = c.id_categoria
+        WHERE
+          de.cantidad_restante > 0
+          AND e.id_estante = 1
+        GROUP BY
+          de.id_articulo,
+          a.nombre_articulo,
+          CAST(a.descripcion AS VARCHAR(MAX)),
+          u.nombre_unidad,
+          u.simbolo,
+          c.cantidad_estimada_por_persona,
+          e.id_estante
+        ORDER BY a.nombre_articulo;
+      `);
+ 
+    return result.recordset;
+  }
+
 
 
 }
