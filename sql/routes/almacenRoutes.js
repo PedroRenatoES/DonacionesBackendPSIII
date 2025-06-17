@@ -5,7 +5,7 @@ const authenticateToken = require('../../middleware/authMiddleware');
 const router = express.Router();
 
 router.get('/con-contenido', authenticateToken, AlmacenController.getAlmacenesConContenido);
-router.get('/', authenticateToken, AlmacenController.getAll);
+router.get('/', AlmacenController.getAll);
 router.get('/por-almacenes/:id_almacen', authenticateToken, AlmacenController.getByAlmacenes);
 router.get('/:id', authenticateToken, AlmacenController.getById);
 router.post('/', authenticateToken, AlmacenController.create);
