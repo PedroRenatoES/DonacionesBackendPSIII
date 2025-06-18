@@ -27,6 +27,36 @@ static async getAll() {
   return result.recordset;
 }
 
+  static async getBajoStockPorAlmacen(idAlmacen) {
+  const pool = await poolPromise;
+  const result = await pool.request()
+    .input('idAlmacen', sql.Int, idAlmacen)
+    .query(`
+      SELECT 
+        dee.id_donacion_especie,
+        dee.id_donacion,
+        don.nombres,
+        don.apellido_paterno,
+        don.apellido_materno,
+        dee.id_articulo,
+        dee.id_espacio,
+        esp.id_estante,
+        est.id_almacen,
+        dee.id_unidad,
+        dee.cantidad,
+        dee.cantidad_restante,
+        dee.estado_articulo
+      FROM DonacionesEnEspecie dee
+      INNER JOIN Donaciones d ON dee.id_donacion = d.id_donacion
+      INNER JOIN Donantes don ON d.id_donante = don.id_donante
+      INNER JOIN Espacios esp ON dee.id_espacio = esp.id_espacio
+      INNER JOIN Estante est ON esp.id_estante = est.id_estante
+      WHERE dee.cantidad_restante < 5 AND est.id_almacen = @idAlmacen
+    `);
+  return result.recordset;
+}
+
+
 
     static async getById(id) {
         const pool = await poolPromise;
