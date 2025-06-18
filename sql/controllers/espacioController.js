@@ -22,6 +22,26 @@ class EspacioController {
             }
     }
 
+        static async llenar(req, res) {
+        try {
+            const { id_espacio } = req.params;
+            const result = await EspacioModel.marcarLleno(id_espacio);
+            res.json(result);
+        } catch (err) {
+            res.status(500).json({ success: false, error: err.message });
+        }
+    },
+
+   static async vaciar(req, res) {
+        try {
+            const { id_espacio } = req.params;
+            const result = await EspacioModel.marcarVacio(id_espacio);
+            res.json(result);
+        } catch (err) {
+            res.status(500).json({ success: false, error: err.message });
+        }
+    }
+
     static async getAll(req, res) {
         try {
             const espacios = await EspacioModel.getAll();
