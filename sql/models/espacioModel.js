@@ -34,6 +34,29 @@ static async getAll() {
   return result.recordset;
 }
 
+    static async marcarLleno(id_espacio) {
+    const pool = await poolPromise;
+    await pool.request()
+        .input('id_espacio', sql.Int, id_espacio)
+        .query(`
+            UPDATE Espacios
+            SET lleno = 1
+            WHERE id_espacio = @id_espacio
+        `);
+    return { success: true, message: 'Espacio marcado como lleno' };
 }
+
+static async marcarVacio(id_espacio) {
+    const pool = await poolPromise;
+    await pool.request()
+        .input('id_espacio', sql.Int, id_espacio)
+        .query(`
+            UPDATE Espacios
+            SET lleno = 0
+            WHERE id_espacio = @id_espacio
+        `);
+    return { success: true, message: 'Espacio marcado como vacío' };
+}
+
 
 module.exports = EspacioModel;
