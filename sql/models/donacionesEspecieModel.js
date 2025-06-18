@@ -22,7 +22,7 @@ static async getAll() {
     INNER JOIN Donaciones d ON dee.id_donacion = d.id_donacion
     INNER JOIN Donantes don ON d.id_donante = don.id_donante
     INNER JOIN Espacios esp ON dee.id_espacio = esp.id_espacio
-    INNER JOIN Estantes est ON esp.id_estante = est.id_estante
+    INNER JOIN Estante est ON esp.id_estante = est.id_estante
   `);
   return result.recordset;
 }
