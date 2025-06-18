@@ -1,26 +1,32 @@
 const { sql, poolPromise } = require(require('../config').dbConnection);
 
 class DonacionesEnEspecieModel {
-    static async getAll() {
-        const pool = await poolPromise;
-        const result = await pool.request().query(`
-          SELECT 
-            dee.id_donacion_especie,
-            dee.id_donacion,
-            don.nombres,
-            don.apellido_paterno,
-            don.apellido_materno,
-            dee.id_articulo,
-            dee.id_espacio,
-            dee.id_unidad,
-            dee.cantidad,
-            dee.cantidad_restante,
-            dee.estado_articulo
-        FROM DonacionesEnEspecie dee
-        INNER JOIN Donaciones d ON dee.id_donacion = d.id_donacion
-        INNER JOIN Donantes don ON d.id_donante = don.id_donante;`);
-        return result.recordset;
-    }
+static async getAll() {
+  const pool = await poolPromise;
+  const result = await pool.request().query(`
+    SELECT 
+      dee.id_donacion_especie,
+      dee.id_donacion,
+      don.nombres,
+      don.apellido_paterno,
+      don.apellido_materno,
+      dee.id_articulo,
+      dee.id_espacio,
+      esp.id_estante,
+      est.id_almacen,
+      dee.id_unidad,
+      dee.cantidad,
+      dee.cantidad_restante,
+      dee.estado_articulo
+    FROM DonacionesEnEspecie dee
+    INNER JOIN Donaciones d ON dee.id_donacion = d.id_donacion
+    INNER JOIN Donantes don ON d.id_donante = don.id_donante
+    INNER JOIN Espacios esp ON dee.id_espacio = esp.id_espacio
+    INNER JOIN Estantes est ON esp.id_estante = est.id_estante
+  `);
+  return result.recordset;
+}
+
 
     static async getById(id) {
         const pool = await poolPromise;
