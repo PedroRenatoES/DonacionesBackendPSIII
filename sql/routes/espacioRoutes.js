@@ -8,5 +8,8 @@ router.get('/estante/:id_estante', authenticateToken, EspacioController.getByEst
 router.get('/por-almacen/:id_almacen', authenticateToken, EspacioController.getByAlmacen);
 
 router.get('/', authenticateToken, EspacioController.getAll);
+router.put('/espacios/:id_espacio/llenar', EspacioController.llenar);
+router.put('/espacios/:id_espacio/vaciar', EspacioController.vaciar);
+
 
 module.exports = router;
