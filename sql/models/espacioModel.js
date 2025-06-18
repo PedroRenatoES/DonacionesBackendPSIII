@@ -22,41 +22,41 @@ class EspacioModel {
         return result.recordset;
     }
 
-static async getAll() {
-  const pool = await poolPromise;
-  const result = await pool.request().query(`
-    SELECT 
-      e.*,
-      est.id_almacen
-    FROM Espacios e
-    INNER JOIN Estante est ON e.id_estante = est.id_estante
-  `);
-  return result.recordset;
-}
+    static async getAll() {
+        const pool = await poolPromise;
+        const result = await pool.request().query(`
+            SELECT 
+              e.*,
+              est.id_almacen
+            FROM Espacios e
+            INNER JOIN Estante est ON e.id_estante = est.id_estante
+        `);
+        return result.recordset;
+    }
 
     static async marcarLleno(id_espacio) {
-    const pool = await poolPromise;
-    await pool.request()
-        .input('id_espacio', sql.Int, id_espacio)
-        .query(`
-            UPDATE Espacios
-            SET lleno = 1
-            WHERE id_espacio = @id_espacio
-        `);
-    return { success: true, message: 'Espacio marcado como lleno' };
+        const pool = await poolPromise;
+        await pool.request()
+            .input('id_espacio', sql.Int, id_espacio)
+            .query(`
+                UPDATE Espacios
+                SET lleno = 1
+                WHERE id_espacio = @id_espacio
+            `);
+        return { success: true, message: 'Espacio marcado como lleno' };
+    }
+
+    static async marcarVacio(id_espacio) {
+        const pool = await poolPromise;
+        await pool.request()
+            .input('id_espacio', sql.Int, id_espacio)
+            .query(`
+                UPDATE Espacios
+                SET lleno = 0
+                WHERE id_espacio = @id_espacio
+            `);
+        return { success: true, message: 'Espacio marcado como vacío' };
+    }
 }
 
-static async marcarVacio(id_espacio) {
-    const pool = await poolPromise;
-    await pool.request()
-        .input('id_espacio', sql.Int, id_espacio)
-        .query(`
-            UPDATE Espacios
-            SET lleno = 0
-            WHERE id_espacio = @id_espacio
-        `);
-    return { success: true, message: 'Espacio marcado como vacío' };
-}
-
-
-module.exports = EspacioModel;
+module.exports = EspacioModel; // Aquí cerramos correctamente la clase
