@@ -22,11 +22,18 @@ class EspacioModel {
         return result.recordset;
     }
 
-    static async getAll() {
-        const pool = await poolPromise;
-        const result = await pool.request().query('SELECT * FROM Espacios');
-        return result.recordset;
-    }
+static async getAll() {
+  const pool = await poolPromise;
+  const result = await pool.request().query(`
+    SELECT 
+      e.*,
+      est.id_almacen
+    FROM Espacios e
+    INNER JOIN Estante est ON e.id_estante = est.id_estante
+  `);
+  return result.recordset;
+}
+
 }
 
 module.exports = EspacioModel;
