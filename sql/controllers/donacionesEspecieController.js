@@ -10,6 +10,17 @@ class DonacionesEnEspecieController {
         }
     }
 
+    static async getBajoStockPorAlmacen(req, res) {
+    try {
+        const { idAlmacen } = req.params;
+        const donaciones = await DonacionesEnEspecieModel.getBajoStockPorAlmacen(idAlmacen);
+        res.json(donaciones);
+    } catch (error) {
+        console.error('Error obteniendo donaciones en bajo stock:', error);
+        res.status(500).json({ error: 'Error obteniendo donaciones en bajo stock' });
+    }
+}
+
     static async getById(req, res) {
         try {
             const { id } = req.params;
