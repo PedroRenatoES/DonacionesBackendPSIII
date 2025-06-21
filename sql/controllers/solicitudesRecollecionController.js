@@ -3,11 +3,14 @@ const SolicitudesRecoleccionModel = require('../models/solicitudesRecoleccionMod
 class SolicitudesRecoleccionController {
   static async create(req, res) {
     try {
-      const { id_donante, ubicacion, detalle_solicitud } = req.body;
+      const { id_donante, ubicacion, detalle_solicitud, latitud, longitud, foto_url } = req.body;
       const id_solicitud = await SolicitudesRecoleccionModel.create(
         id_donante,
         ubicacion,
-        detalle_solicitud
+        detalle_solicitud,
+        latitud,
+        longitud,
+        foto_url
       );
       res.status(201).json({ message: 'Solicitud creada', id_solicitud });
     } catch (error) {
@@ -43,12 +46,15 @@ class SolicitudesRecoleccionController {
   static async update(req, res) {
     try {
       const { id } = req.params;
-      const { id_donante, ubicacion, detalle_solicitud } = req.body;
+      const { id_donante, ubicacion, detalle_solicitud, latitud, longitud, foto_url } = req.body;
       await SolicitudesRecoleccionModel.update(
         id,
         id_donante,
         ubicacion,
-        detalle_solicitud
+        detalle_solicitud,
+        latitud,
+        longitud,
+        foto_url
       );
       res.json({ message: 'Solicitud actualizada' });
     } catch (error) {
