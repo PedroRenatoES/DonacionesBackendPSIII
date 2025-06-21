@@ -4,7 +4,7 @@ const upload = require('../../middleware/uploadConfig');
 const UploadController = require('../controllers/uploadController');
 const authenticateToken = require('../../middleware/authMiddleware');
 
-router.post('/upload', authenticateToken, (req, res) => {
+router.post('/upload', (req, res) => {
   upload.single('imagen')(req, res, err => {
     if (err) {
       console.error('Error multer:', err);
