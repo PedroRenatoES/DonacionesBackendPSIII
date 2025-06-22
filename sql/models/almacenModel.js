@@ -65,15 +65,16 @@ class AlmacenModel {
     return result.recordset;
 }
 
-    static async create(nombre_almacen, ubicacion) {
-        const pool = await poolPromise;
-        await pool.request()
-            .input('nombre_almacen', sql.VarChar, nombre_almacen)
-            .input('ubicacion', sql.VarChar, ubicacion)
-            .input('latitud', sql.VarChar, latitud)
-            .input('longitud', sql.VarChar, longitud)
-            .query('INSERT INTO Almacenes (nombre_almacen, ubicacion, latitud, longitud) VALUES (@nombre_almacen, @ubicacion, @latitud, @longitud)');
-    }
+static async create(nombre_almacen, ubicacion, latitud, longitud) {
+    const pool = await poolPromise;
+    await pool.request()
+        .input('nombre_almacen', sql.VarChar, nombre_almacen)
+        .input('ubicacion', sql.VarChar, ubicacion)
+        .input('latitud', sql.Decimal(9, 6), latitud)   // <-- CORREGIDO
+        .input('longitud', sql.Decimal(9, 6), longitud) // <-- CORREGIDO
+        .query('INSERT INTO Almacenes (nombre_almacen, ubicacion, latitud, longitud) VALUES (@nombre_almacen, @ubicacion, @latitud, @longitud)');
+}
+
 
     static async update(id, nombre_almacen, ubicacion) {
         const pool = await poolPromise;
