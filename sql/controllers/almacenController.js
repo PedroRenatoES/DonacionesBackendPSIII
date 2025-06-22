@@ -91,8 +91,8 @@ class AlmacenController {
 
     static async create(req, res) {
         try {
-            const { nombre_almacen, ubicacion } = req.body;
-            await AlmacenModel.create(nombre_almacen, ubicacion);
+            const { nombre_almacen, ubicacion, latitud, longitud } = req.body;
+            await AlmacenModel.create(nombre_almacen, ubicacion, latitud, longitud);
             res.status(201).json({ message: 'Almacén creado' });
         } catch (error) {
             res.status(500).json({ error: 'Error creando almacén' });
