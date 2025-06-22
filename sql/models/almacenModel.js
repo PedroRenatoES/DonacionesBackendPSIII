@@ -70,7 +70,9 @@ class AlmacenModel {
         await pool.request()
             .input('nombre_almacen', sql.VarChar, nombre_almacen)
             .input('ubicacion', sql.VarChar, ubicacion)
-            .query('INSERT INTO Almacenes (nombre_almacen, ubicacion) VALUES (@nombre_almacen, @ubicacion)');
+            .input('latitud', sql.VarChar, latitud)
+            .input('longitud', sql.VarChar, longitud)
+            .query('INSERT INTO Almacenes (nombre_almacen, ubicacion, latitud, longitud) VALUES (@nombre_almacen, @ubicacion, @latitud, @longitud)');
     }
 
     static async update(id, nombre_almacen, ubicacion) {
