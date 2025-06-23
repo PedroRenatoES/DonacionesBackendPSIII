@@ -134,6 +134,25 @@ static async getDonantesPorArticulo(req, res) {
         }
     }
 
+    static async updateEspacioExterno(req, res) {
+        try {
+            const { id_donacion_especie, id_espacio, id_usuario } = req.body;
+
+            await DonacionesEnEspecieModel.cambiarEspacioYRegistrarMovimiento(
+            id_donacion_especie,
+            id_espacio,
+            id_usuario
+            );
+
+            res.json({ message: 'Espacio actualizado y movimiento registrado' });
+        } catch (error) {
+            console.error('Error actualizando espacio y registrando movimiento:', error);
+            res.status(500).json({ error: 'Error procesando movimiento' });
+        }
+    }
+
+
+
       
 }
 
