@@ -12,6 +12,7 @@ router.get('/por-campana/:id_campana', authenticateToken, DonacionesEnEspecieCon
 router.get('/donantes-por-articulo/:id', DonacionesEnEspecieController.getDonantesPorArticulo);
 router.post('/', authenticateToken, DonacionesEnEspecieController.create);
 router.put('/espacio', DonacionesEnEspecieController.updateEspacio);
+router.put('/espacio-externo', DonacionesEnEspecieController.updateEspacioExterno);
 router.put('/:id', authenticateToken, DonacionesEnEspecieController.update);
 router.delete('/:id', authenticateToken, DonacionesEnEspecieController.delete);
 
