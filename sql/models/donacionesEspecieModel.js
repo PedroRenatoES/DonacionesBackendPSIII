@@ -17,7 +17,8 @@ static async getAll() {
       dee.id_unidad,
       dee.cantidad,
       dee.cantidad_restante,
-      dee.estado_articulo
+      dee.estado_articulo,
+      dee.imagen
     FROM DonacionesEnEspecie dee
     INNER JOIN Donaciones d ON dee.id_donacion = d.id_donacion
     INNER JOIN Donantes don ON d.id_donante = don.id_donante
