@@ -9,11 +9,3 @@ module.exports = router;
 
 
 
-
-server.js
-
-const historialMovimientosRoutes = require('./sql/routes/historialMovimientosRoutes.js')
-
-app.use('/api/historial-movimientos', historialMovimientosRoutes);
-
-
