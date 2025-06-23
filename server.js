@@ -33,6 +33,7 @@ const cajasRoutes = require('./sql/routes/cajasRoutes.js');
 const imagenesCiRoutes = require('./mongo/routes/imagenesCiRoutes.js');
 const imagenesSolicitudRecogidaRoutes = require('./mongo/routes/imagenSolicitudRecogida.js');
 const salidasAlmacenRoutes = require('./sql/routes/salidasAlmacenRoutes.js');
+const historialMovimientosRoutes = require('./sql/routes/historialMovimientosRoutes.js')
 
 const PORT = 3000;
 const app = express();
@@ -89,6 +90,8 @@ app.use('/api/imagenes-ci', imagenesCiRoutes);
 app.use('/api/imagenes-solicitud-recogida', imagenesSolicitudRecogidaRoutes);
 app.use('/api/cajas', cajasRoutes);
 app.use('/api/salidas-almacen', salidasAlmacenRoutes);
+app.use('/api/historial-movimientos', historialMovimientosRoutes);
+
 
 poolPromise.then(pool => {
   app.listen(PORT, () => {
