@@ -29,6 +29,18 @@ class SolicitudesRecoleccionController {
     }
   }
 
+  static async getAllByDonante(req, res) {
+  try {
+    const { id_donante } = req.params;
+    const solicitudes = await SolicitudesRecoleccionModel.getAllByDonante(parseInt(id_donante));
+    res.json(solicitudes);
+  } catch (error) {
+    console.error('Error obteniendo solicitudes del donante:', error);
+    res.status(500).json({ error: 'Error obteniendo solicitudes del donante' });
+  }
+}
+
+
   static async getById(req, res) {
     try {
       const { id } = req.params;
