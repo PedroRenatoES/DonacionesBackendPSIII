@@ -39,6 +39,29 @@ class SolicitudesRecoleccionModel {
     return result.recordset;
   }
 
+  // Obtener todas las solicitudes de un donante específico
+static async getAllByDonante(id_donante) {
+  const pool = await poolPromise;
+  const result = await pool.request()
+    .input('id_donante', sql.Int, id_donante)  // Asegúrate de importar `sql` si no lo tienes ya
+    .query(
+      `SELECT
+         sr.id_solicitud,
+         sr.id_donante,
+         don.nombres + ' ' + don.apellido_paterno + ' ' + don.apellido_materno AS donante,
+         sr.Ubicacion,
+         sr.Detalle_solicitud,
+         sr.latitud,
+         sr.longitud,
+         sr.foto_url
+       FROM SolicitudesRecoleccion sr
+       JOIN Donantes don ON sr.id_donante = don.id_donante
+       WHERE sr.id_donante = @id_donante;`
+    );
+  return result.recordset;
+}
+
+
   // Obtener una solicitud por ID
   static async getById(id) {
     const pool = await poolPromise;
