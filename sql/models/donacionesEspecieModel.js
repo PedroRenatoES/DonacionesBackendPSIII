@@ -301,6 +301,68 @@ static async getAll() {
         `);
   }
 
+
+  static async cambiarEspacioYRegistrarMovimiento(id_donacion_especie, id_espacio_destino, id_usuario) {
+    const pool = await poolPromise;
+
+    // 1. Obtener el espacio y almacén de origen
+    const origenQuery = await pool.request()
+      .input('id_donacion_especie', sql.Int, id_donacion_especie)
+      .query(`
+        SELECT de.id_espacio, a.id_almacen AS id_almacen_origen
+        FROM DonacionesEnEspecie de
+        LEFT JOIN Espacios e ON de.id_espacio = e.id_espacio
+        LEFT JOIN Estante es ON e.id_estante = es.id_estante
+        LEFT JOIN Almacenes a ON es.id_almacen = a.id_almacen
+        WHERE de.id_donacion_especie = @id_donacion_especie
+      `);
+
+    const origen = origenQuery.recordset[0];
+    const id_almacen_origen = origen?.id_almacen_origen || null;
+
+    // 2. Obtener almacén destino
+    const destinoQuery = await pool.request()
+      .input('id_espacio', sql.Int, id_espacio_destino)
+      .query(`
+        SELECT a.id_almacen AS id_almacen_destino
+        FROM Espacios e
+        LEFT JOIN Estante es ON e.id_estante = es.id_estante
+        LEFT JOIN Almacenes a ON es.id_almacen = a.id_almacen
+        WHERE e.id_espacio = @id_espacio
+      `);
+
+    const destino = destinoQuery.recordset[0];
+    const id_almacen_destino = destino?.id_almacen_destino || null;
+
+    // ⚠️ Verificar que no sea el mismo almacén
+    if (id_almacen_origen === id_almacen_destino) {
+      throw new Error('No se puede mover al mismo almacén');
+    }
+
+    // 3. Actualizar el espacio
+    await pool.request()
+      .input('id_donacion_especie', sql.Int, id_donacion_especie)
+      .input('id_espacio', sql.Int, id_espacio_destino)
+      .query(`
+        UPDATE DonacionesEnEspecie
+        SET id_espacio = @id_espacio
+        WHERE id_donacion_especie = @id_donacion_especie
+      `);
+
+    // 4. Insertar en historial
+    await pool.request()
+      .input('id_usuario', sql.Int, id_usuario)
+      .input('id_donacion_especie', sql.Int, id_donacion_especie)
+      .input('id_almacen_origen', sql.Int, id_almacen_origen)
+      .input('id_almacen_destino', sql.Int, id_almacen_destino)
+      .query(`
+        INSERT INTO HistorialMovimientos (id_usuario, id_donacion_especie, fecha_hora, id_almacen_origen, id_almacen_destino)
+        VALUES (@id_usuario, @id_donacion_especie, GETDATE(), @id_almacen_origen, @id_almacen_destino)
+      `);
+  }
+
+
+
     static async getStockPorEstanteId(id_estante) {
     const pool = await poolPromise;
     const result = await pool.request()
