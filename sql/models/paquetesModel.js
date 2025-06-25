@@ -37,10 +37,13 @@ class PaquetesModel {
         }
         const { estado_articulo, cantidad_restante } = info.recordset[0];
 
-        if (estado_articulo === 'sellado') {
-          errorMessages.push(`La donación ${id_donacion_especie} está sellada y no es particionable.`);
+        if (estado_articulo === 'sellado' && cantidad_asignada !== cantidad_restante) {
+          errorMessages.push(
+            `La donación ${id_donacion_especie} está sellada y solo puede asignarse completamente (${cantidad_restante}).`
+          );
           continue;
         }
+
         if (cantidad_asignada > cantidad_restante) {
           errorMessages.push(
             `La cantidad asignada (${cantidad_asignada}) para la donación ${id_donacion_especie} ` +
