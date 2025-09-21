@@ -404,6 +404,44 @@ static async getInventarioConUbicacion(idAlmacen) {
   }
 
 
+  static async getDonacionesPorAlmacen(idAlmacen) {
+  const pool = await poolPromise;
+  const sql = require('mssql');
+
+  const result = await pool.request()
+    .input('idAlmacen', sql.Int, parseInt(idAlmacen))
+    .query(`
+      SELECT 
+        d.id_donacion_especie AS id_donacion,
+        d.cantidad_restante AS cantidad,
+        d.fecha_vencimiento,
+        a.nombre_articulo,
+        don.nombres + ' ' + don.apellido_paterno + ' ' + don.apellido_materno AS nombre_donante,
+        e.codigo AS espacio,
+        es.nombre AS estante,
+        al.nombre_almacen
+      FROM DonacionesEnEspecie d
+      JOIN Donaciones donac
+        ON d.id_donacion = donac.id_donacion
+      JOIN Donantes don
+        ON donac.id_donante = don.id_donante
+      JOIN CatalogoDeArticulos a
+        ON d.id_articulo = a.id_articulo
+      JOIN Espacios e
+        ON d.id_espacio = e.id_espacio
+      JOIN Estante es
+        ON e.id_estante = es.id_estante
+      JOIN Almacenes al
+        ON es.id_almacen = al.id_almacen
+      WHERE d.cantidad_restante > 0
+        AND al.id_almacen = @idAlmacen
+      ORDER BY d.fecha_vencimiento, a.nombre_articulo, don.nombres;
+    `);
+
+  return result.recordset;
+}
+
+
 
 }
 

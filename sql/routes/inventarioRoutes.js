@@ -7,6 +7,7 @@ router.get('/ubicaciones', authenticateToken, InventarioController.getInventario
 router.get('/stock',       InventarioController.getStockPorArticulo);
 router.get('/stock/articulo/:id', InventarioController.getStockPorArticuloPorId);
 router.get('/stock/estante/:id_estante', InventarioController.getStockPorEstanteId);
+router.get('/donaciones/por-almacen', authenticateToken, InventarioController.getDonacionesPorAlmacen);
 
 
 module.exports = router;

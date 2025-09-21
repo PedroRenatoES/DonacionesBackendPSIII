@@ -73,6 +73,23 @@ class InventarioController {
     }
   }
 
+  static async getDonacionesPorAlmacen(req, res) {
+    try {
+        const { idAlmacen } = req.query;
+
+        if (!idAlmacen) {
+        return res.status(400).json({ error: 'Se requiere el idAlmacen' });
+        }
+
+        const donaciones = await DonacionesEnEspecieModel.getDonacionesPorAlmacen(idAlmacen);
+
+        res.json(donaciones);
+    } catch (error) {
+        console.error('Error al obtener donaciones por almacén:', error);
+        res.status(500).json({ error: 'Error obteniendo donaciones por almacén' });
+    }
+  } 
+
   
 
   
