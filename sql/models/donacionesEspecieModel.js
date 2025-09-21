@@ -186,16 +186,18 @@ static async getAll() {
             .query('DELETE FROM DonacionesEnEspecie WHERE id_donacion = @id');
     }
 
-  static async getInventarioConUbicacion() {
-    const pool = await poolPromise;
-    const result = await pool.request().query(`
+static async getInventarioConUbicacion(idAlmacen) {
+  const pool = await poolPromise;
+  const result = await pool.request()
+    .input('idAlmacen', idAlmacen) // usamos parámetro seguro
+    .query(`
       SELECT 
         d.id_articulo,
         a.nombre_articulo,
         c.nombre_categoria,
         u.nombre_unidad,
-        d.cantidad_restante AS cantidad,   -- mostramos sólo cantidad_restante
-        d.fecha_vencimiento,               -- fecha de vencimiento
+        d.cantidad_restante AS cantidad,
+        d.fecha_vencimiento,
         e.codigo       AS espacio,
         es.nombre      AS estante,
         al.nombre_almacen
@@ -213,10 +215,12 @@ static async getAll() {
       JOIN Almacenes al 
         ON es.id_almacen = al.id_almacen
       WHERE d.cantidad_restante > 0
+        AND al.id_almacen = @idAlmacen
       ORDER BY a.nombre_articulo, al.nombre_almacen, es.nombre, e.codigo;
     `);
-    return result.recordset;
-  }
+  return result.recordset;
+}
+
 
   static async getStockPorArticulo() {
   const pool = await poolPromise;

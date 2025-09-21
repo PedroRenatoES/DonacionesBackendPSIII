@@ -33,7 +33,7 @@ class AlmacenController {
         
     }
 
-    static async getAlmacenesConContenido(req, res) {
+  static async getAlmacenesConContenido(req, res) {
   try {
     const resultado = await AlmacenModel.getAlmacenesConContenido();
 
@@ -101,16 +101,20 @@ static async create(req, res) {
 }
 
 
-    static async update(req, res) {
-        try {
-            const { id } = req.params;
-            const { nombre_almacen, ubicacion } = req.body;
-            await AlmacenModel.update(id, nombre_almacen, ubicacion);
-            res.json({ message: 'Almacén actualizado' });
-        } catch (error) {
-            res.status(500).json({ error: 'Error actualizando almacén' });
-        }
+static async update(req, res) {
+    try {
+        const { id } = req.params;
+        const { nombre_almacen, ubicacion, latitud, longitud } = req.body;
+
+        await AlmacenModel.update(id, nombre_almacen, ubicacion, latitud, longitud);
+
+        res.json({ message: 'Almacén actualizado' });
+    } catch (error) {
+        console.error('Error actualizando almacén:', error);
+        res.status(500).json({ error: 'Error actualizando almacén' });
     }
+}
+
 
     static async delete(req, res) {
         try {

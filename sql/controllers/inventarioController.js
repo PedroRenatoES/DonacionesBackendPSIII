@@ -3,7 +3,13 @@ const DonacionesEnEspecieModel = require('../models/donacionesEspecieModel');
 class InventarioController {
   static async getInventarioConUbicaciones(req, res) {
     try {
-      const datos = await DonacionesEnEspecieModel.getInventarioConUbicacion();
+      const { idAlmacen } = req.query;
+
+      if (!idAlmacen) {
+        return res.status(400).json({ error: 'Se requiere el idAlmacen' });
+      }
+
+      const datos = await DonacionesEnEspecieModel.getInventarioConUbicacion(idAlmacen);
 
       const agrupado = {};
       datos.forEach(item => {
@@ -33,6 +39,7 @@ class InventarioController {
       res.status(500).send('Error interno del servidor');
     }
   }
+
 
   static async getStockPorArticulo(req, res) {
     try {

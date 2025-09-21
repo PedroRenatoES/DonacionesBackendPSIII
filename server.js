@@ -35,10 +35,10 @@ const imagenesSolicitudRecogidaRoutes = require('./mongo/routes/imagenSolicitudR
 const salidasAlmacenRoutes = require('./sql/routes/salidasAlmacenRoutes.js');
 const historialMovimientosRoutes = require('./sql/routes/historialMovimientosRoutes.js')
 
-const PORT = 3000;
+const PORT = process.env.PORT || 5000;
 const app = express();
 
-const allowedOrigins = ['http://localhost:5173', 'http://localhost:3001', 'https://front-donaciones.vercel.app'];
+const allowedOrigins = ['http://localhost:5173', 'http://localhost:3001', 'https://front-donaciones.vercel.app', 'http://localhost:3000'];
 
 app.use(cors({
   origin: function (origin, callback) {

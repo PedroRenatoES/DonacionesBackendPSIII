@@ -75,15 +75,23 @@ static async create(nombre_almacen, ubicacion, latitud, longitud) {
         .query('INSERT INTO Almacenes (nombre_almacen, ubicacion, latitud, longitud) VALUES (@nombre_almacen, @ubicacion, @latitud, @longitud)');
 }
 
-
-    static async update(id, nombre_almacen, ubicacion) {
-        const pool = await poolPromise;
-        await pool.request()
-            .input('id', sql.Int, id)
-            .input('nombre_almacen', sql.VarChar, nombre_almacen)
-            .input('ubicacion', sql.VarChar, ubicacion)
-            .query('UPDATE Almacenes SET nombre_almacen = @nombre_almacen, ubicacion = @ubicacion WHERE id_almacen = @id');
-    }
+static async update(id, nombre_almacen, ubicacion, latitud, longitud) {
+    const pool = await poolPromise;
+    await pool.request()
+        .input('id', sql.Int, id)
+        .input('nombre_almacen', sql.VarChar, nombre_almacen)
+        .input('ubicacion', sql.VarChar, ubicacion)
+        .input('latitud', sql.Decimal(9, 6), latitud)
+        .input('longitud', sql.Decimal(9, 6), longitud)
+        .query(`
+            UPDATE Almacenes
+            SET nombre_almacen = @nombre_almacen,
+                ubicacion = @ubicacion,
+                latitud = @latitud,
+                longitud = @longitud
+            WHERE id_almacen = @id
+        `);
+}
 
     static async delete(id) {
         const pool = await poolPromise;
