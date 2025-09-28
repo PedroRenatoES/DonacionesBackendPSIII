@@ -33,8 +33,8 @@ class PuntosDeRecoleccionController {
 
     static async create(req, res) {
         try {
-            const { nombre_punto, direccion, id_campaña } = req.body;
-            await PuntosDeRecoleccionModel.create(nombre_punto, direccion, id_campaña);
+            const { nombre_punto, direccion, id_campana } = req.body;
+            await PuntosDeRecoleccionModel.create(nombre_punto, direccion, id_campana);
             res.status(201).json({ message: 'Punto de recolección creado' });
         } catch (error) {
             res.status(500).json({ error: 'Error creando punto de recolección' });
@@ -44,8 +44,8 @@ class PuntosDeRecoleccionController {
     static async update(req, res) {
         try {
             const { id } = req.params;
-            const { nombre_punto, direccion, id_campaña } = req.body;
-            await PuntosDeRecoleccionModel.update(id, nombre_punto, direccion, id_campaña);
+            const { nombre_punto, direccion, id_campana } = req.body;
+            await PuntosDeRecoleccionModel.update(id, nombre_punto, direccion, id_campana);
             res.json({ message: 'Punto de recolección actualizado' });
         } catch (error) {
             res.status(500).json({ error: 'Error actualizando punto de recolección' });
