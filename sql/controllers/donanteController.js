@@ -41,11 +41,18 @@ class DonanteController {
             const { nombres, apellido_paterno, apellido_materno, correo, telefono, usuario, contraseña_hash } = req.body;
             const id_donante = await DonanteModel.create(nombres, apellido_paterno, apellido_materno, correo, telefono, usuario, contraseña_hash);
             const newDonor = await DonanteModel.getById(id_donante);
+
+            if (!newDonor) {
+                return res.status(201).json({ message: "Donante creado, pero no se pudo obtener los datos" });
+            }
+
             res.status(201).json(newDonor);
         } catch (error) {
-            res.status(500).json({ error: 'Error creando donante' });
+            console.error("Error en DonanteController.create:", error); // <-- importante
+            res.status(500).json({ error: 'Error creando donante', detalle: error.message });
         }
     }
+
 
     static async update(req, res) {
         try {

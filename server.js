@@ -38,7 +38,7 @@ const historialMovimientosRoutes = require('./sql/routes/historialMovimientosRou
 const PORT = process.env.PORT || 5000;
 const app = express();
 
-const allowedOrigins = ['http://localhost:5173', 'http://localhost:3001', 'https://front-donaciones.vercel.app', 'http://localhost:3000'];
+const allowedOrigins = ['http://localhost:5173', 'http://localhost:3001', 'https://front-donaciones.vercel.app', 'http://localhost:3000', 'http://alas-front.local', 'http://dona-front.local', 'http://das-front.local', 'http://ani-front.local', 'http://gevopi.local', 'http://sipi-front.local', 'http://alas-front.local', 'http://auto-front.local', 'http://traz-front.local', 'https://front-donaciones-o9bs.vercel.app'];
 
 app.use(cors({
   origin: function (origin, callback) {
