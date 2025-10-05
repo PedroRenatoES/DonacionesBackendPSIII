@@ -452,11 +452,17 @@ static async getDonacionesPorEstante(idAlmacen) {
         es.nombre AS nombre_estante,
         e.id_espacio,
         e.codigo AS nombre_espacio,
+        e.lleno, 
         d.id_donacion_especie AS id_donacion,
         a.nombre_articulo,
         don.nombres + ' ' + don.apellido_paterno + ' ' + don.apellido_materno AS nombre_donante,
         d.cantidad_restante,
-        d.fecha_vencimiento
+        d.cantidad,
+        d.estado_articulo,
+        d.fecha_vencimiento,
+        donac.id_donante,
+        donac.id_campana,
+        d.id_articulo
       FROM Estante es
       INNER JOIN Espacios e 
         ON es.id_estante = e.id_estante

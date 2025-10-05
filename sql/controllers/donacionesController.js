@@ -53,14 +53,46 @@ class DonacionesController {
 
     static async update(req, res) {
         try {
-            const { id } = req.params;
-            const { tipo_donacion, fecha_donacion, id_donante, id_campana, id_almacen } = req.body;
-            await DonacionesModel.update(id, tipo_donacion, fecha_donacion, id_donante, id_campana, id_almacen);
-            res.json({ message: 'Donación actualizada' });
+            const { id } = req.params;  // Este es id_donacion_especie
+            const {
+                id_donante,
+                id_campana,
+                id_articulo,
+                cantidad,
+                estado_articulo,
+                fecha_vencimiento
+            } = req.body;
+
+            console.log('🚀 Solicitud de actualización recibida:', {
+                id_donacion_especie: id,  // ✅ Cambiado
+                body: req.body
+            });
+
+            const result = await DonacionesModel.update(
+                parseInt(id),  // ✅ Este es id_donacion_especie
+                id_donante,
+                id_campana,
+                id_articulo,
+                cantidad,
+                estado_articulo,
+                fecha_vencimiento
+            );
+
+            console.log('✅ Actualización completada en modelo');
+            res.status(200).json({
+                message: 'Donación actualizada exitosamente',
+                result
+            });
+
         } catch (error) {
-            res.status(500).json({ error: 'Error actualizando donación' });
+            console.error('💥 Error en controller update:', error);
+            res.status(500).json({ 
+                error: 'Error actualizando donación',
+                details: error.message 
+            });
         }
     }
+
     static async updateEstado(req, res) {
         try {
             const { id } = req.params;
@@ -74,11 +106,48 @@ class DonacionesController {
 
     static async delete(req, res) {
         try {
-            const { id } = req.params;
-            await DonacionesModel.delete(id);
-            res.json({ message: 'Donación y su detalle asociada eliminadas correctamente' });
+            const { id } = req.params; // id_donacion_especie
+
+            console.log('🚀 Solicitud de eliminación recibida:', {
+                id_donacion_especie: id
+            });
+
+            // Validar que el ID sea un número válido
+            if (!id || isNaN(parseInt(id))) {
+                return res.status(400).json({ 
+                    error: 'ID de donación inválido' 
+                });
+            }
+
+            const result = await DonacionesModel.delete(parseInt(id));
+
+            console.log('✅ Eliminación completada en modelo');
+            res.status(200).json({
+                message: result.message,
+                result
+            });
+
         } catch (error) {
-            res.status(500).json({ error: 'Error eliminando donación' });
+            console.error('💥 Error en controller delete:', error);
+            
+            if (error.message.includes('No se encontró')) {
+                return res.status(404).json({ 
+                    error: 'Donación no encontrada',
+                    details: error.message 
+                });
+            }
+
+            if (error.message.includes('No se puede eliminar')) {
+                return res.status(400).json({ 
+                    error: 'No se puede eliminar la donación',
+                    details: error.message 
+                });
+            }
+
+            res.status(500).json({ 
+                error: 'Error eliminando donación',
+                details: error.message 
+            });
         }
     }
 }

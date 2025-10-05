@@ -91,52 +91,69 @@ class InventarioController {
   }
   
   static async getDonacionesPorEstante(req, res) {
-  try {
-    const { idAlmacen } = req.params;
-    const data = await DonacionesEnEspecieModel.getDonacionesPorEstante(idAlmacen);
+    try {
+      const { idAlmacen } = req.params;
+      const data = await DonacionesEnEspecieModel.getDonacionesPorEstante(idAlmacen);
 
-    const estantes = {};
+      const estantes = {};
 
-    data.forEach(row => {
-      if (!estantes[row.id_estante]) {
-        estantes[row.id_estante] = {
-          id_estante: row.id_estante,
-          nombre_estante: row.nombre_estante,
-          espacios: {}
-        };
-      }
+      data.forEach(row => {
+        if (!estantes[row.id_estante]) {
+          estantes[row.id_estante] = {
+            id_estante: row.id_estante,
+            nombre_estante: row.nombre_estante,
+            espacios: {}
+          };
+        }
 
-      if (!estantes[row.id_estante].espacios[row.id_espacio]) {
-        estantes[row.id_estante].espacios[row.id_espacio] = {
-          id_espacio: row.id_espacio,
-          nombre_espacio: row.nombre_espacio,
-          donaciones: []
-        };
-      }
+        if (!estantes[row.id_estante].espacios[row.id_espacio]) {
+          estantes[row.id_estante].espacios[row.id_espacio] = {
+            id_espacio: row.id_espacio,
+            nombre_espacio: row.nombre_espacio,
+            lleno: row.lleno,
+            estado_espacio: row.lleno ? 'lleno' : 'disponible',
+            donaciones: []
+          };
+        }
 
-      if (row.id_donacion) {
-        estantes[row.id_estante].espacios[row.id_espacio].donaciones.push({
-          id_donacion: row.id_donacion,
-          nombre_articulo: row.nombre_articulo,
-          nombre_donante: row.nombre_donante,
-          cantidad_restante: row.cantidad_restante,
-          fecha_vencimiento: row.fecha_vencimiento
-        });
-      }
-    });
+        if (row.id_donacion) {
+          estantes[row.id_estante].espacios[row.id_espacio].donaciones.push({
+            id_donacion: row.id_donacion,
+            nombre_articulo: row.nombre_articulo,
+            nombre_donante: row.nombre_donante,
+            cantidad_restante: row.cantidad_restante,
+            fecha_vencimiento: row.fecha_vencimiento,
+            id_donante: row.id_donante,
+            id_campana: row.id_campana,
+            id_articulo: row.id_articulo,
+            cantidad: row.cantidad,
+            estado_articulo: row.estado_articulo
+          });
+        }
+      });
 
-    const resultado = Object.values(estantes).map(est => ({
-      ...est,
-      espacios: Object.values(est.espacios)
-    }));
+      const resultado = Object.values(estantes).map(est => ({
+        ...est,
+        espacios: Object.values(est.espacios)
+      }));
 
-    res.json(resultado);
-  } catch (error) {
-    console.error('Error en getDonacionesPorEstante:', error);
-    res.status(500).json({ error: 'Error al obtener donaciones por estante' });
+      console.log('📊 Datos enviados al frontend:', {
+        totalEstantes: resultado.length,
+        espaciosConDatos: resultado.flatMap(est => est.espacios.map(esp => ({
+          id_espacio: esp.id_espacio,
+          nombre: esp.nombre_espacio,
+          lleno: esp.lleno,
+          estado_espacio: esp.estado_espacio,
+          donaciones: esp.donaciones.length
+        })))
+      });
+
+      res.json(resultado);
+    } catch (error) {
+      console.error('Error en getDonacionesPorEstante:', error);
+      res.status(500).json({ error: 'Error al obtener donaciones por estante' });
+    }
   }
-}
-
 
   
 
