@@ -38,7 +38,7 @@ class AuthController {
           rol: user.id_rol
         },
         process.env.JWT_SECRET,
-        { expiresIn: '2h' }
+        { expiresIn: '15h' }
       );
 
       res.status(200).json({
