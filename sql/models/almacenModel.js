@@ -65,6 +65,39 @@ class AlmacenModel {
     return result.recordset;
 }
 
+    static async getAlmacenesPorDonacion(idDonacion) {
+        const pool = await poolPromise;
+
+        const result = await pool.request()
+        .input('id_donacion', sql.Int, parseInt(idDonacion))
+        .query(`
+            SELECT
+            al.id_almacen,
+            MAX(CAST(al.nombre_almacen AS VARCHAR(200)))    AS nombre_almacen,
+            MAX(CAST(al.ubicacion AS VARCHAR(500)))        AS ubicacion,
+            MAX(CAST(al.latitud AS VARCHAR(50)))           AS latitud,
+            MAX(CAST(al.longitud AS VARCHAR(50)))          AS longitud
+            FROM PedidosDeAyuda pda
+            JOIN Paquetes paq
+            ON pda.id_pedido = paq.id_pedido
+            JOIN PaqueteDonaciones pd
+            ON paq.id_paquete = pd.id_paquete
+            JOIN DonacionesEnEspecie de
+            ON pd.id_donacion_especie = de.id_donacion_especie
+            JOIN Espacios e
+            ON de.id_espacio = e.id_espacio
+            JOIN Estante es
+            ON e.id_estante = es.id_estante
+            JOIN Almacenes al
+            ON es.id_almacen = al.id_almacen
+            WHERE pda.id_donacion = @id_donacion
+            GROUP BY al.id_almacen
+            ORDER BY al.id_almacen;
+        `);
+
+        return result.recordset;
+    }
+
 static async create(nombre_almacen, ubicacion, latitud, longitud) {
     const pool = await poolPromise;
     await pool.request()

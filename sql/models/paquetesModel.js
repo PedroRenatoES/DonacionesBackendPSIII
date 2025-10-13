@@ -90,7 +90,7 @@ static async getAll() {
     const pool = await poolPromise;
     const result = await pool.request()
       .query(`
-        SELECT id_paquete, nombre_paquete, descripcion, fecha_creacion
+        SELECT id_paquete, nombre_paquete, descripcion, fecha_creacion, estado, id_pedido
         FROM Paquetes
         WHERE estado = 0
         ORDER BY fecha_creacion DESC;
@@ -102,7 +102,7 @@ static async getAll() {
   const pool = await poolPromise;
   const result = await pool.request()
     .query(`
-      SELECT id_paquete, nombre_paquete, descripcion, fecha_creacion
+      SELECT id_paquete, nombre_paquete, descripcion, fecha_creacion, estado, id_pedido
       FROM Paquetes
       WHERE estado = 1
       ORDER BY fecha_creacion DESC;
@@ -154,13 +154,13 @@ static async marcarComoEnviado(id_paquete) {
     const paquete = pkgRes.recordset[0];
     if (!paquete) return null;
 
-    // Items detallados
+    // Items detallados (usando cantidad_asignada)
     const itemsRes = await pool.request()
       .input('id_paquete', sql.Int, id_paquete)
       .query(`
         SELECT deE.id_donacion_especie,
               art.nombre_articulo,
-              deE.cantidad,
+              pd.cantidad_asignada,
               u.simbolo AS unidad
         FROM PaqueteDonaciones pd
         JOIN DonacionesEnEspecie deE
@@ -175,14 +175,14 @@ static async marcarComoEnviado(id_paquete) {
     const items = itemsRes.recordset;
     paquete.items = items;
 
-    // Totales por artículo
+    // Totales por artículo (sumando cantidad_asignada)
     const totalMap = {};
     for (const item of items) {
       const key = `${item.nombre_articulo} (${item.unidad})`;
       if (!totalMap[key]) {
         totalMap[key] = 0;
       }
-      totalMap[key] += item.cantidad;
+      totalMap[key] += Number(item.cantidad_asignada);
     }
 
     paquete.totales_por_articulo = Object.entries(totalMap).map(([nombre_articulo, total]) => ({

@@ -220,7 +220,7 @@ class UserModel {
     static async getByCi(ci) {
         const pool = await poolPromise;
         const result = await pool.request()
-            .input('ci', sql.Int, ci)
+            .input('ci', sql.BigInt, ci)
             .query('SELECT * FROM Usuarios WHERE ci = @ci');
         return result.recordset[0];
     }

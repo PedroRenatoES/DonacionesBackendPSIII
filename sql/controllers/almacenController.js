@@ -33,6 +33,26 @@ class AlmacenController {
         
     }
 
+    static async getAlmacenesPorDonacion(req, res) {
+      try {
+        const { id } = req.params; // id = id_donacion externo
+        if (!id) {
+          return res.status(400).json({ error: 'Se requiere el id de donación' });
+        }
+
+        const data = await AlmacenModel.getAlmacenesPorDonacion(id);
+
+        if (!data || data.length === 0) {
+          return res.status(404).json({ message: 'No se encontraron almacenes para ese id_donacion' });
+        }
+
+        res.json(data);
+      } catch (error) {
+        console.error('Error al obtener almacenes por donación:', error);
+        res.status(500).json({ message: 'Error interno del servidor' });
+      }
+    }
+
   static async getAlmacenesConContenido(req, res) {
   try {
     const resultado = await AlmacenModel.getAlmacenesConContenido();
